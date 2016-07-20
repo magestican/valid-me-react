@@ -3,12 +3,11 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
-export class ValidMeReact extends React.Component {
+class ValidMeReact extends React.Component {
 
     constructor(props) {
         super(props);
         this.init();
-
         this.main = this.main.bind(this);
         this.validMeItem = {};
       }
@@ -43,13 +42,12 @@ export class ValidMeReact extends React.Component {
         }
       }
     }
-
     componentDidMount(asd) {
       let object = ReactDom.findDOMNode(this);
       let input = $(object).find('input');
-      resultElement = this.main(input);
+      this.main(input);
+      //let resultElement = this.main(input);
     }
-
 
     render() {
       let copies = React.Children.map(this.props.children, (child, i) => {
@@ -65,20 +63,40 @@ export class ValidMeReact extends React.Component {
     }
     main(input) {
 
-
-
       let props = this.props;
-      if (props.validmeactions == "") {
-        throw RegExp("Error : all validme references must have a validmeaction on which to be validated");
+      if (props.group == "") {
+        throw RegExp("Error : all validme references must have a group on which to be validated");
         return;
       }
       let element = $(input); //wrap input around jquery to have jquery helpers
       let validMeManager;
 
-      if (!window.validMeReact)
-        window.validMeReact = {
-          validMeManager: {}
-        };
+      if (!window.validMeReact){
+        if (window.APP && window.APP.LANGUAGE.Errors) {
+          window.validMeReact = {
+            validMeManager: {ERROR : window.APP.LANGUAGE.Errors}
+          };
+        }
+        else {
+          let errors = {
+            IsRequired : "This field is required",
+            CannotBeEmpty : "This field cannot be empty",
+            OnlyAlphanumeric : "This field must contain letters and numbers",
+            ZeroIsNotValid : "0 is not a valid value for this field",
+            IncorrectSizeOfNumbersPartOne : "The limit of numbers in this field is",
+            IncorrectSizeOfNumbersPartTwo : "please adjust it",
+            OnlyNumbersAllowed :  "This field should contain only numbers",
+            InvalidUrl : "This field should contain a valid URL",
+            InvalidEmail : "You should input a valid email",
+            SelectionRequired : "Selection cannot be empty",
+            ToggleRequired : "You must check this option"
+          }
+          window.validMeReact = {
+            validMeManager: {ERROR : errors}
+          };
+        }
+
+      }
       validMeManager = window.validMeReact.validMeManager;
 
       // if (validMeManager._currentPageOrSection == undefined) { //this is to avoid validating other pages than the current one
@@ -104,15 +122,16 @@ export class ValidMeReact extends React.Component {
 
       let newQueueEventTask = (element, props) => { //add this validation item to the global queue
 
+          const customMessageOrThis = (orMessage) => {
+            return props.validmemessage != undefined ? props.validmemessage : orMessage;
+          }
           var value = element.val(); //this means is a radio button or a  checkbox
-
           var result = {
             message: "",
             element: {},
             good: true,
             value: value
           }
-
           //a reference to an old element is kept sometimes by angular..
           //TODO : fix what the previous comment says
           if (!$.contains(document, element[0])) { //WE SHOULD REMOVE THIS FROM THE QUE RATHER THAN JUST RETURNING TRUE
@@ -153,14 +172,14 @@ export class ValidMeReact extends React.Component {
 
                 if (regex.test(value)) {
                   result.good = false;
-                  result.message = validMeManager.ERROR.onlyAlphanumeric;
+                  result.message = customMessageOrThis(validMeManager.ERROR.OnlyAlphanumeric);
                   return result;
                 } else if (value != "") {
                   result.good = true;
                   return result;
                 } else {
                   result.good = false;
-                  result.message = validMeManager.ERROR.cannotBeEmpty;
+                  result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
                   return result;
                 }
               }
@@ -175,19 +194,19 @@ export class ValidMeReact extends React.Component {
                 result.message = props.validmemessage;
 
               let condition2 = regex.test(value);
-              let condition1 = validRules.rule.contains("$value") && condition2 ? eval(validRules.rule.replace("$value", value)) : true;
+              let condition1 = validRules.rule.includes("$value") && condition2 ? eval(validRules.rule.replace("$value", value)) : true;
               let extraValidation = validRules.rule != undefined && regex.test(validRules.rule) ? true : false;
 
               if (value != "" && condition1 && condition2) {
                 if (validRules.rule != undefined && validRules.rule != "") {
                   if (value == "0") {
                     result.good = false;
-                    result.message = "0 is not a valid value for this field"
+                    result.message = customMessageOrThis(validMeManager.ERROR.ZeroIsNotValid);
                     return result;
                   } else {
                     if (extraValidation && value.length > validRules.rule) {
                       result.good = false;
-                      result.message = props.validmemessage != undefined ? props.validmemessage : "The limit of numbers in this field is " + validRules.rule + " please adjust it"
+                      result.message = props.validmemessage != undefined ? props.validmemessage : validMeManager.ERROR.IncorrectSizeOfNumbersPartOne + ' ' + validRules.rule + ' ' + validMeManager.ERROR.IncorrectSizeOfNumbersPartTwo
                       return result;
                     }
                     result.good = true;
@@ -200,12 +219,12 @@ export class ValidMeReact extends React.Component {
 
               } else {
                 if (value == "")
-                  result.message = validMeManager.ERROR.cannotBeEmpty;
+                  result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
                 else {
                   if (!condition1)
-                    result.message = props.validmemessage != undefined ? props.validmemessage : "This field should contain only numbers";
+                    result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
                   else if (condition1 && !condition2) {
-                    result.message = "This field should contain only numbers";
+                    result.message = customMessageOrThis( validMeManager.ERROR.OnlyNumbersAllowed);
 
                   }
                 }
@@ -222,9 +241,9 @@ export class ValidMeReact extends React.Component {
                 return result;
               } else {
                 if (value == "")
-                  result.message = "This field should contain a valid URL";
+                  result.message = props.validmemessage != undefined ? props.validmemessage : validMeManager.ERROR.InvalidUrl;
                 else
-                  result.message = "This field should contain a valid URL";
+                  result.message = props.validmemessage != undefined ? props.validmemessage : validMeManager.ERROR.InvalidUrl;
                 result.good = false;
                 return result;
               }
@@ -238,14 +257,13 @@ export class ValidMeReact extends React.Component {
                 let regex = new RegExp(part1 + validRules.rule + part2);
                 if (value != "" && regex.test(value)) {
                   result.message = "Value " + value + " is a number";
-
                   result.good = true;
                   return result;
                 } else {
                   if (value == "")
-                    result.message = validMeManager.ERROR.cannotBeEmpty;
+                    result.message =  props.validmemessage != undefined ? props.validmemessage : validMeManager.ERROR.CannotBeEmpty;
                   else
-                    result.message = "This field should contain only numbers";
+                    result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
                   result.good = false;
                   return result;
                 }
@@ -256,7 +274,7 @@ export class ValidMeReact extends React.Component {
             if (validRules.type == "email") {
 
               if (value == "") {
-                result.message = validMeManager.ERROR.cannotBeEmpty;
+                result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
                 result.good = false;
                 return result;
               }
@@ -268,14 +286,14 @@ export class ValidMeReact extends React.Component {
                 return result;
               } else {
                 result.good = false;
-                result.message = "You should input a valid email";
+                result.message = customMessageOrThis(validMeManager.ERROR.InvalidEmail);
                 return result;
               }
 
             }
             if (validRules.type == "required") {
               if (value == "" || value == "No file selected") {
-                result.message = validMeManager.ERROR.isRequired;
+                result.message = customMessageOrThis(validMeManager.ERROR.IsRequired);
                 result.good = false;
                 console.log(result.message);
                 return result;
@@ -287,11 +305,11 @@ export class ValidMeReact extends React.Component {
             if (validRules.type == "dropdown") {
 
               if (value == "") {
-                result.message = "You must select an option";
+                result.message =  customMessageOrThis(validMeManager.ERROR.SelectionRequired);
                 result.good = false;
                 return result;
               } else if (value == "- Select -") {
-                result.message = "You must select an option";
+                result.message = customMessageOrThis(validMeManager.ERROR.SelectionRequired);
                 result.good = false;
                 return result;
               } else {
@@ -306,7 +324,7 @@ export class ValidMeReact extends React.Component {
                 if (props.validmemessage != undefined && props.validmemessage != "")
                   result.message = props.validmemessage;
                 else
-                  result.message = "You must check this option"
+                  result.message = customMessageOrThis(validMeManager.ERROR.ToggleRequired);
                 result.good = false;
                 return result;
               } else {
@@ -344,7 +362,7 @@ export class ValidMeReact extends React.Component {
               "email \n" +
               "required \n)")
           }
-        })
+         }
       validMeManager.validMeQueue.push(newQueueEventTask);
       this.validMeItem = validMeManager.validMeQueue[index].element = element;
       validMeManager.validMeQueue[index].props = props;
@@ -352,6 +370,7 @@ export class ValidMeReact extends React.Component {
       validMeManager.validMeQueue[index].errorActionVisible = false;
 
       validMeManager.validMeQueue[index].toggleError = validMeManager.validMeQueue[index].showError = () => {
+        let possibleLabel = {};
         let el = validMeManager.validMeQueue[index.toString()].element
         if (isUorN(validMeManager.validMeQueue[index].props.validmeselectthirdparent))
           possibleLabel = el.parent().parent().parent().find("label:first");
@@ -364,99 +383,14 @@ export class ValidMeReact extends React.Component {
         }
       }
       element[0].onclick = validMeManager.validMeQueue[index].showError;
-      validMeManager.validMeQueue[index].validmeactions = props.validmeactions != undefined ? props.validmeactions : "";
-      validMeManager.validMeQueue[index].errorTemplate = <div data-show={validMeReact.validMeManager.validMeQueue[index.toString()].errorActionVisible} class="error-label"><label style="text-align:left" class="error-color control-label bold">{errorMessage + index.toString()}</label></div>;
+      validMeManager.validMeQueue[index].group = props.group != undefined ? props.group : "";
+      validMeManager.validMeQueue[index].errorTemplate = <div data-show={validMeManager.validMeQueue[index].errorActionVisible} class="error-label"><label style="text-align:left" class="error-color control-label bold">{}</label></div>;
       validMeManager.validMeQueue[index].errorCheckmarkTemplate = <i onClick={validMeManager.validMeQueue[index.toString()].toggleError} class="warning big circle icon error-checkmark">!!</i>;
 
-      let codeInjector = (validMeAction) => {
-        //check if the action we are asked to validate is undefined or if we already have wrapped ourself around it, in which case dont do it again
-        if (typeof(validMeAction) === 'function') {
-          if (validMeManager.validMeActionPreExecution == undefined) { //do not create the same unbiding/validation-triggering function twice
-            //create an observer waiting for someone to raise a Checkups event
-            validMeManager.validMeActionPreExecution = (event, parameters) => {
-              debugger
-              var targetButton = parameters[2][0] != undefined ? parameters[2][0].target : null;
-              var errored = false;
-              var firstErroredElement = [];
-              if (parameters[2] && parameters[2][0] != "canceled") {
-                //execute queue
-                if (validMeManager.validMeQueue.forEach != undefined) {
-                  var lastIndex = 0;
-
-                  for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-                    var validMeTask = validMeManager.validMeQueue[i];
-
-                    if (validMeTask.validmeactions.indexOf(parameters[3]) > -1) {
-                      var theresult = validationTask(validMeTask, undefined, true);
-                      if (!theresult.good) {
-                        //this is to make certain we are only marking as errored the optional values IF they have a value
-                        if (validMeTask.props.validmeoptional != undefined) {
-                          if (theresult.value != "") {
-                            errored = true
-                            if (firstErroredElement.length == 0)
-                              firstErroredElement = validMeTask.element;
-                          }
-                        } else {
-                          errored = true;
-                          if (firstErroredElement.length == 0)
-                            firstErroredElement = validMeTask.element;
-                        }
-                        //scroll to element
-                      }
-
-                    }
-                    lastIndex = i;
-                  }
-                  //continue if errored false
-                  if (!errored && validMeManager.validMeQueue.length == lastIndex + 1) {
-                    parameters[0].apply(parameters[1], parameters[2])
-                  } else {
-                    targetButton.toggleClass("error-shaking", true)
-                    setTimeout(function() {
-                        targetButton.toggleClass("error-shaking", false);
-                      }, 350)
-                      //scroll to element
-                    if (firstErroredElement.length > 0) {
-                      if ($('.sidebar').length > 0)
-                        $('.sidebar').scrollTo(firstErroredElement[0], {
-                          offsetTop: '50'
-                        })
-                      else
-                        $('body').scrollTo(firstErroredElement[0], {
-                          offsetTop: '50'
-                        })
-                    }
-                  }
-                }
-              } else {
-                parameters[0].apply(parameters[1], parameters[2])
-              }
-            }
-            debugger
-            let name = "functionWrapper" + functionName(validMeAction);
-
-            //**CODE INJECTION PROCESS**//
-
-            //wrap function to inject emit at the previous to function execution
-            let watchingFunction = eval(validMeAction);
-            validMeManager.wrapper[name] = function functionWrapper(evt) {
-
-                //execute validation before anything else, then execute method over which we are looking
-                scope.$emit(validMeAction.replace('.', '') + "Checkups", [validMeManager.wrapper[name].watchingFunction, this, arguments, validMeAction]);
-              }
-              //set the watching function for nesting purposes
-            validMeManager.wrapper[name].watchingFunction = watchingFunction;
-
-            eval("scope." + validMeAction + ".modified = true");
-
-            eval(members + " = validMeManager.wrapper." + name);
-          }
-        }
-      }
-      angular.forEach(props.validmeactions, codeInjector)
 
       //ugly jquery like stuff
-      var validationTask = (validMeTask, reset, triggeredByButton, forceError, errorMessage) => {
+      if (validMeManager.validationTask == undefined){
+      validMeManager.validationTask = (validMeTask, reset, triggeredByButton, forceError, errorMessage) => {
 
           if (validMeTask.element.attr("validmecondition") != undefined && !reset) {
             //check if condition is true
@@ -490,8 +424,6 @@ export class ValidMeReact extends React.Component {
 
               if (validMeTask.props.validmenored == undefined)
                 validMeTask.element.toggleClass('error-border', true);
-
-
               if (errorMessage != undefined)
                 result.message = errorMessage;
 
@@ -560,20 +492,19 @@ export class ValidMeReact extends React.Component {
           }
           return result
         }
+        }
         //pre-emptive checkings
         //if (!(element.attr("type") == "checkbox")) {
 
       if (element.attr("datepicker") == undefined) {
 
          element.on('blur', function() {
-          scope.safeApply();
           validMeManager.validMeQueue[index].blurhappened = true;
-          validationTask(validMeManager.validMeQueue[index]);
+          validMeManager.validationTask(validMeManager.validMeQueue[index]);
         });
          element.on('input', function() {
           if (validMeManager.validMeQueue[index].blurhappened == true) {
-            validationTask(validMeManager.validMeQueue[index]);
-            scope.safeApply();
+            validMeManager.validationTask(validMeManager.validMeQueue[index]);
           }
 
         });
@@ -582,7 +513,6 @@ export class ValidMeReact extends React.Component {
 
         if (validMeManager.validMeQueue[index].blurhappened == true) {
           validationTask(validMeManager.validMeQueue[index]);
-          scope.safeApply();
         }
 
       });
@@ -608,75 +538,6 @@ export class ValidMeReact extends React.Component {
       //}
 
 
-      validMeManager.resetValidations = function(notUgly, smart, groupValidation, element) {
-
-        if (notUgly) {
-          if (validMeManager.validMeQueue.forEach != undefined) {
-
-            for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-              var validMeTask = validMeManager.validMeQueue[i];
-              validationTask(validMeTask);
-            }
-          }
-        } else if (smart) {
-          for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-            function timer(id) {
-              var _this = this;
-              this.id = id;
-              this.execute = function() {
-                var validMeTask = validMeManager.validMeQueue[_this.id];
-                if (!$(validMeTask.element).is(':visible')) {
-                  validationTask(validMeTask, true);
-                }
-              }
-            }
-            setTimeout(new timer(i).execute, 100)
-          }
-
-        } else if (groupValidation != undefined) {
-
-          for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-
-            var validMeTask = validMeManager.validMeQueue[i];
-            if (validMeTask.element.attr("vttrigger") == groupValidation) {
-
-              function timer(id) {
-                var _this = this;
-                this.id = id;
-                this.execute = function() {
-                  var validMeTask = validMeManager.validMeQueue[_this.id];
-                  validationTask(validMeTask, true);
-                }
-              }
-              setTimeout(new timer(i).execute, 100)
-            }
-          }
-        } else if (element != undefined) {
-
-          for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-
-            var validMeTask = validMeManager.validMeQueue[i];
-
-            if (validMeTask.props.ngModel != undefined) {
-              if (validMeTask.props.ngModel.split(".name").join("") == element.attr("modelBind")) {
-                validationTask(validMeTask, true);
-              } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ng-model")) {
-                validationTask(validMeTask, true);
-              } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ngmodel")) {
-                validationTask(validMeTask, true);
-              }
-            }
-          }
-        } else {
-          if (validMeManager.validMeQueue.forEach != undefined) {
-
-            for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-              var validMeTask = validMeManager.validMeQueue[i];
-              validationTask(validMeTask, true);
-            }
-          }
-        }
-      }
 
       validMeManager.areThereErrors = function() {
         var res = document.getElementsByClassName("error-checkmark");
@@ -689,11 +550,11 @@ export class ValidMeReact extends React.Component {
           if (validMeTask.props.ngModel != undefined) {
             if (validMeTask.props != undefined && validMeTask.props.ngModel != undefined) {
               if (validMeTask.props.ngModel.split(".name").join("") == element.attr("modelBind")) {
-                return validationTask(validMeTask, false, false, true, message);
+                return validMeManager.validationTask(validMeTask, false, false, true, message);
               } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ng-model")) {
-                return validationTask(validMeTask, false, false, true, message);
+                return validMeManager.validationTask(validMeTask, false, false, true, message);
               } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ngmodel")) {
-                return validationTask(validMeTask, false, false, true, message);
+                return validMeManager.validationTask(validMeTask, false, false, true, message);
               }
             }
           }
@@ -701,6 +562,74 @@ export class ValidMeReact extends React.Component {
       }
     }
   }
+
+
+ let validate = (notUgly, smart, groupValidation, element) => {
+          let validMeManager = window.validMeReact.validMeManager;
+          if (notUgly) {
+            if (validMeManager.validMeQueue.forEach != undefined) {
+
+              for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
+                var validMeTask = validMeManager.validMeQueue[i];
+                validMeManager.validationTask(validMeTask);
+              }
+            }
+          } else if (smart) {
+            for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
+              function timer(id) {
+                var _this = this;
+                this.id = id;
+                this.execute = function() {
+                  var validMeTask = validMeManager.validMeQueue[_this.id];
+                  if (!$(validMeTask.element).is(':visible')) {
+                    validMeManager.validationTask(validMeTask, true);
+                  }
+                }
+              }
+              setTimeout(new timer(i).execute, 100)
+            }
+
+          } else if (groupValidation != undefined) {
+            for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
+              if(validMeManager.validMeQueue[i].group.includes(groupValidation)) {
+                function timer(id) {
+                  var _this = this;
+                  this.id = id;
+                  this.execute = function() {
+
+                    var validMeTask = validMeManager.validMeQueue[_this.id];
+                    let res = validMeManager.validationTask(validMeTask);
+                  }
+                }
+                setTimeout(new timer(i).execute, 100)
+              }
+            }
+          } else if (element != undefined) {
+
+            for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
+
+              var validMeTask = validMeManager.validMeQueue[i];
+
+              if (validMeTask.props.ngModel != undefined) {
+                if (validMeTask.props.ngModel.split(".name").join("") == element.attr("modelBind")) {
+                  validMeManager.validationTask(validMeTask, true);
+                } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ng-model")) {
+                  validMeManager.validationTask(validMeTask, true);
+                } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ngmodel")) {
+                  validMeManager.validationTask(validMeTask, true);
+                }
+              }
+            }
+          } else {
+            if (validMeManager.validMeQueue.forEach != undefined) {
+
+              for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
+                var validMeTask = validMeManager.validMeQueue[i];
+                validMeManager.validationTask(validMeTask, true);
+              }
+            }
+          }
+        }
 
 const random = (min, max) => {
   return Math.random() * (max - min) + min;
@@ -728,7 +657,15 @@ const notNullNotEmpty = (string) => {
   return string != undefined && string != null && string != "";
 }
 const isUorN = (val) => { //undefined or null check
-  return angular.isUndefined(val) || val === null
+  return isUndefined(val) || val === null
+}
+const isUndefined = (val) => { //undefined or null check
+  return val == undefined;
+}
+
+export default {
+  wrapper : ValidMeReact,
+  validate : validate
 }
 
 
