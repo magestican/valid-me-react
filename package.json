@@ -1,6 +1,6 @@
 {
   "name": "valid-me-react",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Kit created to easily add validation to inputs in your page",
   "scripts": {
     "remove-demo": "babel-node tools/removeDemo.js",
@@ -28,7 +28,6 @@
   "dependencies": {
     "babel-cli": "6.8.0",
     "es6-promise": "3.2.1",
-    "file-loader": "0.8.5",
     "jquery": "2.2.4",
     "object-assign": "4.1.0",
     "react": "15.0.2",
@@ -38,13 +37,13 @@
     "redux": "3.5.2",
     "redux-thunk": "2.1.0",
     "reselect": "2.5.1",
-    "semantic-ui-css": "2.1.8",
     "url-loader": "0.5.7",
     "whatwg-fetch": "1.0.0"
   },
   "devDependencies": {
     "amd-define-factory-patcher-loader": "1.0.0",
     "babel-cli": "6.8.0",
+    "file-loader": "0.8.5",
     "babel-core": "6.8.0",
     "babel-loader": "6.2.4",
     "babel-plugin-react-display-name": "2.0.0",
