@@ -1,7 +1,7 @@
 {
   "name": "valid-me-react",
-  "version": "0.1.3",
-  "description": "Starter kit for creating apps with React and Redux",
+  "version": "0.1.4",
+  "description": "Kit created to easily add validation to inputs in your page",
   "scripts": {
     "remove-demo": "babel-node tools/removeDemo.js",
     "start-message": "babel-node tools/startMessage.js",
