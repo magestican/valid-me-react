@@ -1,2 +1,2 @@
-export source from './source';
-export target from './target';
+export source from './src';
+export target from './dist';
