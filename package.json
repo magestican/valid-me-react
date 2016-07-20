@@ -1,7 +1,7 @@
 {
   "name": "valid-me-react",
-  "version": "0.1.5",
-  "description": "Kit created to easily add validation to inputs in your page",
+  "version": "0.1.6",
+  "description": "Kit created to easily add validation to inputs in your page, live demo : https://magestican.github.io/valid-me-react/",
   "scripts": {
     "remove-demo": "babel-node tools/removeDemo.js",
     "start-message": "babel-node tools/startMessage.js",
