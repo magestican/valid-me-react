@@ -2,6 +2,7 @@
 
 import React from 'react';
 import ReactDom from 'react-dom';
+import {render} from 'react-dom';
 
 class ValidMeReact extends React.Component {
 
@@ -59,7 +60,7 @@ class ValidMeReact extends React.Component {
         });
         return copy;
       })
-      return <div>{copies} <div data-show={this.validMeItem.showErrorTemplate}>{this.validMeItem.errorTemplate}</div></div>;
+      return <div>{copies}</div>;
     }
     main(input) {
 
@@ -384,14 +385,18 @@ class ValidMeReact extends React.Component {
       }
       element[0].onclick = validMeManager.validMeQueue[index].showError;
       validMeManager.validMeQueue[index].group = props.group != undefined ? props.group : "";
-      validMeManager.validMeQueue[index].errorTemplate = <div data-show={validMeManager.validMeQueue[index].errorActionVisible} class="error-label"><label style="text-align:left" class="error-color control-label bold">{}</label></div>;
-      validMeManager.validMeQueue[index].errorCheckmarkTemplate = <i onClick={validMeManager.validMeQueue[index.toString()].toggleError} class="warning big circle icon error-checkmark">!!</i>;
+      validMeManager.validMeQueue[index].errorTemplate = props.template || '<div class="error-label"><label className="error-color">$ERRORHERE</label></div>';
+      validMeManager.validMeQueue[index].errorCheckmarkTemplate = '<i onClick={validMeManager.validMeQueue[index.toString()].toggleError} class="warning big circle icon error-checkmark">!</i>';
 
 
       //ugly jquery like stuff
       if (validMeManager.validationTask == undefined){
       validMeManager.validationTask = (validMeTask, reset, triggeredByButton, forceError, errorMessage) => {
 
+          if (!$.contains(document, validMeTask.element[0])) { //ignore invalid references
+              return
+          }
+          else{
           if (validMeTask.element.attr("validmecondition") != undefined && !reset) {
             //check if condition is true
             if (!eval(validMeTask.element.attr("validmecondition"))) {
@@ -409,7 +414,6 @@ class ValidMeReact extends React.Component {
 
           var successEvent = props.validmesuccess;
           var errorEvent = props.validmeerror;
-
 
           if ((!result.good && reset == undefined) || forceError == true) {
 
@@ -429,12 +433,10 @@ class ValidMeReact extends React.Component {
 
               window[errorMessage + validMeTask.index.toString()] = result.message;
 
-              //do not append again
-              if (validMeTask.element.parent().parent().find(".error-label").length == 0) {
-
+              if (validMeTask.element.parent().find(".error-label").length == 0) {//do not append again
                 if (result.message != "") {
-                  validMeTask.showErrorTemplate = true;
-                  validMeTask.showErrorCheckmarkTemplate = true;
+                  validMeTask.element.parent().append(validMeTask.errorTemplate);
+                  validMeTask.element.parent().append(validMeTask.errorCheckmarkTemplate);
                 }
                 //change left label (if exists) to have a red color
                 var possibleLabel = {};
@@ -468,13 +470,13 @@ class ValidMeReact extends React.Component {
 
           } else {
             validMeTask.element.toggleClass('error-border', false);
-            validMeTask.element.parent().parent().find(".error-label").remove();
-            validMeTask.element.parent().parent().find(".error-checkmark").remove();
+            validMeTask.element.parent().find(".error-label").remove();
+            validMeTask.element.parent().find(".error-checkmark").remove();
             var possibleLabel = {}
             if (validMeTask.props.validmeoptional != undefined) {
-              possibleLabel = validMeTask.element.parent().parent().find("label:first");
+              possibleLabel = validMeTask.element.parent().find("label:first");
             } else {
-              possibleLabel = validMeTask.element.parent().parent().parent().find("label:first");
+              possibleLabel = validMeTask.element.parent().parent().find("label:first");
             }
 
             //if child exists
@@ -489,6 +491,7 @@ class ValidMeReact extends React.Component {
               successEvent();
             }
 
+          }
           }
           return result
         }
@@ -510,11 +513,9 @@ class ValidMeReact extends React.Component {
         });
       }
       element.on('change', function() {
-
         if (validMeManager.validMeQueue[index].blurhappened == true) {
-          validationTask(validMeManager.validMeQueue[index]);
+          validMeManager.validationTask(validMeManager.validMeQueue[index]);
         }
-
       });
       //}
       //else {
@@ -590,20 +591,11 @@ class ValidMeReact extends React.Component {
             }
 
           } else if (groupValidation != undefined) {
-            for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-              if(validMeManager.validMeQueue[i].group.includes(groupValidation)) {
-                function timer(id) {
-                  var _this = this;
-                  this.id = id;
-                  this.execute = function() {
-
-                    var validMeTask = validMeManager.validMeQueue[_this.id];
-                    let res = validMeManager.validationTask(validMeTask);
-                  }
-                }
-                setTimeout(new timer(i).execute, 100)
+            validMeManager.validMeQueue.forEach(function (validMeTask,i) {
+              if(validMeTask.group.includes(groupValidation)) {
+                let res = validMeManager.validationTask(validMeTask);
               }
-            }
+            })
           } else if (element != undefined) {
 
             for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
