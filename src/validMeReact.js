@@ -371,22 +371,12 @@ class ValidMeReact extends React.Component {
       validMeManager.validMeQueue[index].errorActionVisible = false;
 
       validMeManager.validMeQueue[index].toggleError = validMeManager.validMeQueue[index].showError = () => {
-        let possibleLabel = {};
-        let el = validMeManager.validMeQueue[index.toString()].element
-        if (isUorN(validMeManager.validMeQueue[index].props.validmeselectthirdparent))
-          possibleLabel = el.parent().parent().parent().find("label:first");
-        else if (isUorN(validMeManager.validMeQueue[index].props.validmeselectfourthparent))
-          possibleLabel = el.parent().parent().parent().parent().find("label:first");
-        else
-          possibleLabel = el.parent().parent().find("label:first");
-        if (possibleLabel.length > 0) {
-          validMeManager.validMeQueue[index.toString()].errorActionVisible = true;
-        }
+        validMeManager.validMeQueue[index].element.parent().find(".error-label").show();
       }
       element[0].onclick = validMeManager.validMeQueue[index].showError;
       validMeManager.validMeQueue[index].group = props.group != undefined ? props.group : "";
-      validMeManager.validMeQueue[index].errorTemplate = props.template || '<div class="error-label"><label className="error-color">$ERRORHERE</label></div>';
-      validMeManager.validMeQueue[index].errorCheckmarkTemplate = '<i onClick={validMeManager.validMeQueue[index.toString()].toggleError} class="warning big circle icon error-checkmark">!</i>';
+      validMeManager.validMeQueue[index].errorTemplate = props.template || '<div style="display:none;" class="error-label"><label className="error-color">$ERRORHERE</label></div>';
+      validMeManager.validMeQueue[index].errorCheckmarkTemplate = '<i onclick="validMeReact.validMeManager.validMeQueue['+ index.toString() +'].toggleError();" class="warning big circle icon error-checkmark">!</i>';
 
 
       //ugly jquery like stuff
