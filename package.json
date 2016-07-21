@@ -1,6 +1,6 @@
 {
   "name": "valid-me-react",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Kit created to easily add validation to inputs in your page, live demo : https://magestican.github.io/valid-me-react/",
   "scripts": {
     "remove-demo": "babel-node tools/removeDemo.js",
@@ -23,6 +23,7 @@
     "test:watch": "npm run test -- --watch",
     "publish" : ""
   },
+  "main": "./dist/bundle.js",
   "author": "Bryan Arbelo",
   "license": "MIT",
   "dependencies": {
@@ -104,6 +105,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/coryhouse/react-slingshot"
+    "url": "https://github.com/magestican/valid-me-react"
   }
 }
