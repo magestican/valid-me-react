@@ -1,6 +1,6 @@
 {
   "name": "valid-me-react",
-  "version": "0.2.1",
+  "version": "0.1.6",
   "description": "Kit created to easily add validation to inputs in your page, live demo : https://magestican.github.io/valid-me-react/",
   "scripts": {
     "remove-demo": "babel-node tools/removeDemo.js",
@@ -21,14 +21,14 @@
     "test:cover": "babel-node node_modules/isparta/bin/isparta cover --root src --report html node_modules/mocha/bin/_mocha -- --require ./tools/testSetup.js \"src/**/*.spec.js\" --reporter progress",
     "test:cover:travis": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly _mocha -- --require ./tools/testSetup.js \"src/**/*.spec.js\" && cat ./coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
     "test:watch": "npm run test -- --watch",
-    "pub" : "npm run build-web && npm publish"
+    "publish" : ""
   },
-  "main": "./dist/bundle.js",
   "author": "Bryan Arbelo",
   "license": "MIT",
   "dependencies": {
     "babel-cli": "6.8.0",
     "es6-promise": "3.2.1",
+    "jquery": "2.2.4",
     "object-assign": "4.1.0",
     "react": "15.0.2",
     "react-dom": "15.0.2",
@@ -104,6 +104,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/magestican/valid-me-react"
+    "url": "https://github.com/coryhouse/react-slingshot"
   }
 }
