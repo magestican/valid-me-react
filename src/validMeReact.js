@@ -4,6 +4,8 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {render} from 'react-dom';
 
+
+
 export class ValidMeReact extends React.Component {
 
     constructor(props) {
