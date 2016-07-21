@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {render} from 'react-dom';
 
-class ValidMeReact extends React.Component {
+export class ValidMeReact extends React.Component {
 
     constructor(props) {
         super(props);
@@ -555,7 +555,7 @@ class ValidMeReact extends React.Component {
   }
 
 
- let validate = (notUgly, smart, groupValidation, element) => {
+ export let validate = (notUgly, smart, groupValidation, element) => {
           let validMeManager = window.validMeReact.validMeManager;
           if (notUgly) {
             if (validMeManager.validMeQueue.forEach != undefined) {
@@ -643,11 +643,6 @@ const isUorN = (val) => { //undefined or null check
 }
 const isUndefined = (val) => { //undefined or null check
   return val == undefined;
-}
-
-export default {
-  wrapper : ValidMeReact,
-  validate : validate
 }
 
 
