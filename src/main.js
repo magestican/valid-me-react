@@ -1,4 +1,3 @@
-import ValidMeReact from './validMeReact';
+/* components */
 
-
-console.log(ValidMeReact);
+export {ValidMeReact,ForceValidation} from './ValidMeReact'

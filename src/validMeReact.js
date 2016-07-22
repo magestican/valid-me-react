@@ -5,7 +5,6 @@ import ReactDom from 'react-dom';
 import {render} from 'react-dom';
 
 
-
 export class ValidMeReact extends React.Component {
 
     constructor(props) {
@@ -556,8 +555,7 @@ export class ValidMeReact extends React.Component {
     }
   }
 
-
- export let validate = (notUgly, smart, groupValidation, element) => {
+ export let ForceValidation = (notUgly, smart, groupValidation, element) => {
           let validMeManager = window.validMeReact.validMeManager;
           if (notUgly) {
             if (validMeManager.validMeQueue.forEach != undefined) {

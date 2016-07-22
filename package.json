@@ -1,6 +1,10 @@
 {
   "name": "valid-me-react",
-  "version": "0.2.1",
+  "version": "0.2.5",
+  "files": [
+    "es6",
+    "umd"
+  ],
   "description": "Kit created to easily add validation to inputs in your page, live demo : https://magestican.github.io/valid-me-react/",
   "scripts": {
     "remove-demo": "babel-node tools/removeDemo.js",
@@ -21,7 +25,7 @@
     "test:cover": "babel-node node_modules/isparta/bin/isparta cover --root src --report html node_modules/mocha/bin/_mocha -- --require ./tools/testSetup.js \"src/**/*.spec.js\" --reporter progress",
     "test:cover:travis": "babel-node node_modules/isparta/bin/isparta cover --root src --report lcovonly _mocha -- --require ./tools/testSetup.js \"src/**/*.spec.js\" && cat ./coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
     "test:watch": "npm run test -- --watch",
-    "pub" : "npm run build-web && npm publish"
+    "prepublish": "npm run build-web"
   },
   "main": "./dist/bundle.js",
   "author": "Bryan Arbelo",
@@ -29,6 +33,7 @@
   "dependencies": {
     "babel-cli": "6.8.0",
     "es6-promise": "3.2.1",
+    "jquery": "3.1.0",
     "object-assign": "4.1.0",
     "react": "15.0.2",
     "react-dom": "15.0.2",
@@ -69,7 +74,6 @@
     "eslint-watch": "2.1.11",
     "expose-loader": "0.7.1",
     "extract-text-webpack-plugin": "1.0.1",
-    "file-loader": "0.8.5",
     "isparta": "4.0.0",
     "mocha": "2.4.5",
     "node-sass": "3.7.0",
