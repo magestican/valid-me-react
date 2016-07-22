@@ -1,6 +1,6 @@
 {
   "name": "valid-me-react",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "files": [
     "es6",
     "umd"
@@ -27,7 +27,7 @@
     "test:watch": "npm run test -- --watch",
     "prepublish": "npm run build-web"
   },
-  "main": "./dist/bundle.js",
+  "main": "./index.js",
   "author": "Bryan Arbelo",
   "license": "MIT",
   "dependencies": {
