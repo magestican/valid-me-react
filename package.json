@@ -1,11 +1,12 @@
 {
   "name": "valid-me-react",
-  "version": "0.7.5",
+  "version": "0.7.56",
   "files": [
     "es6",
     "umd"
   ],
   "description": "Kit created to easily add validation to inputs in your page, live demo : https://magestican.github.io/valid-me-react/",
+  "files" : "./src/**/*.js",
   "scripts": {
     "start-message": "babel-node tools/startMessage.js",
     "prestart": "npm-run-all --parallel start-message remove-dist",
