@@ -8,31 +8,29 @@ No more form validations, with valid-me-react you can validate groups of items, 
 
 ```jsx
 
-
 import ReactDOM from 'react-dom';
-import {ValidMe,forceValidation} from './validMeReact';
+import {ValidMe, forceValidation} from './validMeReact';
 
-
-let doHi = ()  => {
+let doHi = () => {
   let areThereErrors = forceValidation(undefined, undefined, 'hi'); //validate elements belonging to group hi
   console.log(areThereErrors);
 }
-let handleChange = (event)  => {
+let handleChange = (event) => {
   console.log(event.target.value);
 }
 
-ReactDOM.render(
-  (<div>
+ReactDOM.render((
   <div>
+    <div>
       <ValidMe validmefor="numeric" group="hi">
-          <input type='text' onChange={handleChange}/>
+        <input type='text' onChange={handleChange}/>
       </ValidMe>
-      </div>
-      <button onClick={doHi}> Hi </button>
-  </div>),
-  document.getElementById('app')
-);
-
+    </div>
+    <button onClick={doHi}>
+      Hi
+    </button>
+  </div>
+), document.getElementById('app'));
 ```
 
 *The styles available in the live-sample are on the sample-styles.css file*
