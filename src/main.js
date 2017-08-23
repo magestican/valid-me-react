@@ -1,3 +1,3 @@
 /* components */
 
-export {ValidMeReact,ForceValidation} from './ValidMeReact'
+export {ValidMe,clearAllValidationErrors,forceValidation} from './ValidMeReact';

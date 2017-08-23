@@ -7,7 +7,6 @@
   ],
   "description": "Kit created to easily add validation to inputs in your page, live demo : https://magestican.github.io/valid-me-react/",
   "scripts": {
-    "remove-demo": "babel-node tools/removeDemo.js",
     "start-message": "babel-node tools/startMessage.js",
     "prestart": "npm-run-all --parallel start-message remove-dist",
     "start": "npm-run-all --parallel test:watch open:src lint:watch",
