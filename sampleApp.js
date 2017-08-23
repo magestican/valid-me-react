@@ -8,7 +8,7 @@ let doHi = ()  => {
 let handleChange = (event)  => {
   console.log(event.target.value);
 }
-render() {
+let render = ()  => {
   return <div>
     <ValidMe validmefor="numeric" group="hi">
       <input type='text' onChange={this.handleChange}/>
