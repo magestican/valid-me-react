@@ -1,8 +1,10 @@
-Modern validation for modern applications.
+![Valid-Me-React][http://i.imgur.com/Afhv7ao.png]
+
+## Modern validation for modern applications.
 
 No more form validations, with valid-me-react you can validate groups of items, independently of which form they belong to.
 
-React sample using JSX :
+# React sample using JSX :
 
 ```jsx
 
@@ -33,4 +35,4 @@ ReactDOM.render(
 
 ```
 
-The styles available in the live-sample are on the sample-styles.css file
+*The styles available in the live-sample are on the sample-styles.css file*
