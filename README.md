@@ -1,4 +1,4 @@
-![Valid-Me-React][http://i.imgur.com/Afhv7ao.png]
+[Valid-Me-React]: http://i.imgur.com/Afhv7ao.png "Valid-Me-React"
 
 ## Modern validation for modern applications.
 
