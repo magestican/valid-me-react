@@ -18,7 +18,7 @@ let doHi = () => {
 let handleChange = (event) => {
   console.log(event.target.value);
 }
-console.log(document.getElementById('app'));
+
 ReactDOM.render((
   <div>
     <div>
