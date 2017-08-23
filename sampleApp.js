@@ -1,10 +1,11 @@
 import ReactDom from 'react-dom';
 import ValidMe from './src/validMeReact';
 
-doHi(){
+let doHi = ()  => {
   let validationResult = ValidMeReact.validate(undefined,undefined,"hi"); //validate elements belonging to group hi
+
 }
-handleChange(event){
+let handleChange = (event)  => {
   console.log(event.target.value);
 }
 render() {
