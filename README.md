@@ -9,7 +9,7 @@ No more form validations, with valid-me-react you can validate groups of items, 
 ```jsx
 
 import ReactDOM from 'react-dom';
-import {ValidMe, forceValidation} from './validMeReact';
+import {ValidMe,forceValidation} from 'valid-me-react/src/validMeReact';
 
 let doHi = () => {
   let areThereErrors = forceValidation(undefined, undefined, 'hi'); //validate elements belonging to group hi
