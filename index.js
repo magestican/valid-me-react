@@ -1,4 +1,4 @@
-require('../dist/bundle.js');
+require('./dist/bundle.js');
 
 var validMe = global.ValidMe;
 var clearAllValidationErrors = global.clearAllValidationErrors
