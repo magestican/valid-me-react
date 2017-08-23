@@ -5,20 +5,15 @@
     <title>Valid Me React Sample</title>
     <link rel="shortcut icon" href="favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="./system.js"></script>
   <link rel="stylesheet" href="/styles.css"></head>
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
   <body>
     <div id="app">
     </div>
-    <script>
-    SystemJS.config({
-      map: {
-        'plugin-babel': './plugin-babel.js',
-      'systemjs-babel-build': './systemjs-babel-browser.js'
-      },
-      transpiler: 'plugin-babel'
-      });
-      SystemJS.import('./sampleApp.js');
-    </script>
+    <script src="/bundle.js"></script>
+    <script src="./bundle.js"></script>
   </body>
 </html>

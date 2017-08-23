@@ -7,7 +7,7 @@ const GLOBALS = {
 };
 export default {
   debug: true,
-  devtool: 'cheap-module-eval-source-map', // more info:https://webpack.github.io/docs/build-performance.html#sourcemaps and https://webpack.github.io/docs/configuration.html#devtool
+  devtool: 'eval-source-map', // more info:https://webpack.github.io/docs/build-performance.html#sourcemaps and https://webpack.github.io/docs/configuration.html#devtool
   noInfo: false, // set to false to see a list of every file being bundled.
   entry: [
     'webpack-hot-middleware/client?reload=true',

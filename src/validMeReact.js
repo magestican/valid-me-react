@@ -1,8 +1,7 @@
 /* eslint-disable import/default */
 import React from 'react';
 import { render, findDOMNode } from 'react-dom';
-import { connect } from 'react-redux';
-
+let phoneNumberUtil = require('google-libphonenumber').PhoneNumberUtil;
 class ValidMeComponent extends React.Component {
 
   constructor(props) {
@@ -26,7 +25,7 @@ class ValidMeComponent extends React.Component {
 
   componentWillUnmount() {
     if (window.validMeReact) {
-      window.validMeReact.validMeManager.validMeQueue = window.validMeReact.validMeManager.validMeQueue.splice(this.state.index, 1);
+      window.validMeReact.validMeManager.validMeQueue.splice(this.state.index, 1);
     }
   }
 
@@ -59,9 +58,10 @@ class ValidMeComponent extends React.Component {
   }
 
   render() {
-    function doneTyping() {
+    let doneTyping = () => {
       let validMeManager = window.validMeReact.validMeManager;
-      if (isHidden(validMeManager[this.state.index].element))
+
+      if (isHidden(validMeManager.validMeQueue[this.state.index].element))
         return;
       validMeTask = {};
       validMeTask = validMeManager.validMeQueue[this.state.index];
@@ -76,7 +76,15 @@ class ValidMeComponent extends React.Component {
     let copies = React.Children.map(this.props.children, (child, i) => {
       let copy = React.cloneElement(child, {
         onChange: (event) => {
+          console.log("onchange")
           let validMeManager = window.validMeReact.validMeManager;
+          validMeTask = validMeManager.validMeQueue[this.state.index];
+
+          validMeTask.element.typingTimer = 0; //timer identifier
+          validMeTask.element.doneTypingInterval = 3100; //wait three seconds, then validate
+          //on keyup, start the countdown
+          validMeTask.element.typingTimer = setTimeout(doneTyping, validMeTask.element.doneTypingInterval);
+
           validMeTask = validMeManager.validMeQueue[this.state.index];
           if (validMeTask.isDropdown || validMeTask.blurhappened == true) {
             if (validMeManager.validationTask(validMeTask, true).good) { //disable timeout validation if this is ok
@@ -93,8 +101,8 @@ class ValidMeComponent extends React.Component {
         },
         onInput: (event) => {
           let validMeManager = window.validMeReact.validMeManager;
-          let element = validMeManager.validMeQueue[this.state.index];
-          if (element.attr("datepicker") == undefined) {
+          let validMeTask = validMeManager.validMeQueue[this.state.index];
+          if (validMeTask.element.attr("datepicker") == undefined) {
             validMeTask = {};
             validMeTask = validMeManager.validMeQueue[this.state.index];
             if (validMeTask.blurhappened == true) { //|| validMeTask.element.val() != ''  //filled up fields which are being modified should continue
@@ -123,6 +131,7 @@ class ValidMeComponent extends React.Component {
             if (isGood) { //disable timeout validation if this is ok
               clearTimeout(validMeTask.element.typingTimer);
             }
+
             if (isGood && !validMeManager.areThereErrors(validMeTask.group, false))
               enableActionButton(validMeTask.group);
             else
@@ -133,34 +142,15 @@ class ValidMeComponent extends React.Component {
           }
         },
         onFocus: (event) => {
+          console.log("onfocus exe")
           let validMeManager = window.validMeReact.validMeManager;
           validMeTask = {};
-          validMeTask = validMeManager.validMeQueue[this.state.focus];
+          validMeTask = validMeManager.validMeQueue[this.state.index];
           if (validMeTask.element.val() != '' && !validMeManager.areThereErrors(validMeTask.group, false)) {
             enableActionButton(validMeTask.group);
           }
           if (child.props.onFocus != undefined) {
             child.props.onFocus(event);
-          }
-        },
-        onKeyUp: () => {
-          let validMeManager = window.validMeReact.validMeManager;
-          validMeTask = validMeManager.validMeQueue[this.state.index];
-          validMeTask.element.typingTimer = 0; //timer identifier
-          validMeTask.element.doneTypingInterval = 3200; //wait three seconds, then validate
-          //on keyup, start the countdown
-          clearTimeout(validMeTask.element.typingTimer);
-          validMeTask.element.typingTimer = setTimeout(doneTyping, validMeTask.element.doneTypingInterval);
-          if (child.props.onKeyUp != undefined) {
-            child.props.onKeyUp(event);
-          }
-        },
-        onKeyDown() {
-          let validMeManager = window.validMeReact.validMeManager;
-          validMeTask = validMeManager.validMeQueue[this.state.index];
-          clearTimeout(validMeTask.element.typingTimer);
-          if (child.props.onKeyDown != undefined) {
-            child.props.onKeyDown(event);
           }
         }
 
@@ -186,7 +176,8 @@ class ValidMeComponent extends React.Component {
       if (window.APP && window.APP.LANGUAGE.Errors) {
         window.validMeReact = {
           validMeManager: {
-            ERROR: window.APP.LANGUAGE.Errors
+            ERROR: window.APP.LANGUAGE.Errors,
+            VALIDATION: window.APP.CONFIGURATION.VALIDATION
           }
         };
       } else {
@@ -201,11 +192,16 @@ class ValidMeComponent extends React.Component {
           InvalidUrl: "This field should contain a valid URL",
           InvalidEmail: "You should input a valid email",
           SelectionRequired: "Selection cannot be empty",
-          ToggleRequired: "You must check this option"
+          ToggleRequired: "You must check this option",
+          NoValidPhoneNumber: "You have not specified a valid phone number"
+        }
+        let validation = {
+          CountryCode: 'AU'
         }
         window.validMeReact = {
           validMeManager: {
-            ERROR: errors
+            ERROR: errors,
+            VALIDATION: validation
           }
         };
       }
@@ -256,6 +252,7 @@ class ValidMeComponent extends React.Component {
           ? props.validmemessage
           : orMessage;
       }
+
       var value = props.validmefor == 'dropdown'
         ? element.text()
         : findDOMNode(this).querySelector('input').value; //this means is a radio button or a  checkbox
@@ -335,10 +332,73 @@ class ValidMeComponent extends React.Component {
             result.good = true;
           return result;
         }
+        if (validRules.type.indexOf("phoneNumber") >= 0) {
+          let validatePhoneType = undefined;
+          if (validRules.type.split('-').length > 1) {
+            validatePhoneType = parseInt(validRules.type.split('-')[1]);
+          }
+
+          if (validRules.rule.includes('emptyok') && value == '') {
+            result.good = true;
+            return result;
+          }
+          try {
+            if (0 > value.indexOf('+')) {//doesnt start with +
+              let util = phoneNumberUtil.getInstance();
+              let parsedNumber = util.parse(value, validMeManager.VALIDATION.CountryCode);
+              if (util.isValidNumber(parsedNumber)) {
+                let numberType = util.getNumberType(parsedNumber);
+                if (!validatePhoneType || numberType == validatePhoneType) {
+                  //either not validatePhone type provided
+                  //or if provided it matches the numberType
+                  result.good = true;
+                }
+                else {
+                  result.good = false;
+                  result.message = customMessageOrThis(validMeManager.ERROR.NoValidPhoneNumber);
+                }
+              } else {
+                result.good = false;
+                result.message = customMessageOrThis(validMeManager.ERROR.NoValidPhoneNumber);
+              }
+            }
+            else if (window.intlTelInputUtils.isValidNumber(value)) {
+              let numberType = window.intlTelInputUtils.getNumberType(value);
+              if (
+                numberType == phoneTypesEnum.MOBILE ||
+                numberType == phoneTypesEnum.FIXED_LINE ||
+                numberType == phoneTypesEnum.FIXED_LINE_OR_MOBILE ||
+                numberType == phoneTypesEnum.PERSONAL_NUMBER ||
+                numberType == phoneTypesEnum.VOIP ||
+                numberType == phoneTypesEnum.TOLL_FREE) {
+                console.log('validatePhoneType', validatePhoneType, '   ', numberType);
+                if (!validatePhoneType || (validatePhoneType == numberType)) {
+                  result.good = true;
+                }
+                else {
+                  result.good = false;
+                  result.message = customMessageOrThis(validMeManager.ERROR.NoValidPhoneNumber);
+                }
+              } else {
+                result.good = false;
+                result.message = customMessageOrThis(validMeManager.ERROR.NoValidPhoneNumber);
+              }
+            }
+            else {
+              result.good = false;
+              result.message = customMessageOrThis(validMeManager.ERROR.NoValidPhoneNumber);
+            }
+          } catch (ex) {
+            result.good = false;
+            result.message = customMessageOrThis(validMeManager.ERROR.NoValidPhoneNumber);
+          }
+
+          return result;
+        }
         if (validRules.type == "numeric") {
           let part1 = "^[";
           let part2 = "]+$";
-
+          
           let regex = new RegExp(part1 + "0-9" + part2);
 
           if (props.validmemessage != undefined && props.validmemessage != "")
@@ -570,7 +630,7 @@ class ValidMeComponent extends React.Component {
         element[0].onclick = validMeManager.validMeQueue[this.state.index].showError;
 
       validMeManager.validMeQueue[this.state.index].errorTemplate = props.template || '<div style="display:none;" class="error-label"><span class="error-pointy-corner"></span><span className="error-color">$ERRORHERE</span>  </div>';
-      validMeManager.validMeQueue[this.state.index].errorCheckmarkTemplate = '<i onclick="validMeReact.validMeManager.validMeQueue[' + index.toString() + '].toggleError();" class="warning big circle icon error-checkmark"></i>';
+      validMeManager.validMeQueue[this.state.index].errorCheckmarkTemplate = '<i onclick="validMeReact.validMeManager.validMeQueue[' + index.toString() + '].toggleError();" class="warning big circle icon error-checkmark">!</i>';
       validMeManager.validMeQueue[this.state.index].isDropdown = isDropdown;
 
       //ugly jquery like stuff
@@ -771,10 +831,10 @@ let groupValidationLoop = (groupName, showErrorsIfNeeded) => {
 }
 
 const enableActionButton = (group) => {
-  $(document.body.querySelector('[data-group*="' + group + '"]')).toggleClass('disable', false)
+  $('[data-group*="' + group + '"]').toggleClass('disable', false)
 }
 const disableActionButton = (group) => {
-  $(document.body.querySelector('[data-group*="' + group + '"]')).toggleClass('disable', true)
+  $('[data-group*="' + group + '"]').toggleClass('disable', true)
 }
 
 export let forceValidation = (notUgly, smart, groupsToValidate, element) => { //force validation has to return true or false
@@ -878,7 +938,39 @@ const isUndefined = (val) => { //undefined or null check
   return val == undefined;
 }
 
-export let ValidMe = connect()(ValidMeComponent); //CONNECT IS A REACT HELPER FUNCTION
+export const phoneTypesEnum = {
+  FIXED_LINE: 0,
+  MOBILE: 1,
+  // In some regions (e.g. the USA), it is impossible to distinguish between
+  // fixed-line and mobile numbers by looking at the phone number itself.
+  FIXED_LINE_OR_MOBILE: 2,
+  // Freephone lines
+  TOLL_FREE: 3,
+  PREMIUM_RATE: 4,
+  // The cost of this call is shared between the caller and the recipient, and
+  // is hence typically less than PREMIUM_RATE calls. See
+  // http://en.wikipedia.org/wiki/Shared_Cost_Service for more information.
+  SHARED_COST: 5,
+  // Voice over IP numbers. This includes TSoIP (Telephony Waiting Area over IP).
+  VOIP: 6,
+  // A personal number is associated with a particular person, and may be routed
+  // to either a MOBILE or FIXED_LINE number. Some more information can be found
+  // here: http://en.wikipedia.org/wiki/Personal_Numbers
+  PERSONAL_NUMBER: 7,
+  PAGER: 8,
+  // Used for 'Universal Access Numbers' or 'Company Numbers'. They may be
+  // further routed to specific offices, but allow one number to be used for a
+  // company.
+  UAN: 9,
+  // Used for 'Voice Mail Access Numbers'.
+  VOICEMAIL: 10,
+  // A phone number is of type UNKNOWN when it does not fit any of the known
+  // patterns for a specific region.
+  UNKNOWN: -1
+};
+
+
+export let ValidMe = ValidMeComponent; //CONNECT IS A REACT HELPER FUNCTION
 
 /* SAMPLE
   <text-area input iconleft icon="user" placeholder="{{currentLang.login.usernamePlaceHolder}}" ng-model="model.user.username" validme validmefor="email" validmeaction="login" validmemessage="You must enter all your details to continue"></text-area>
