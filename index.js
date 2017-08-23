@@ -1,1 +1,3 @@
-export {ValidMe,clearAllValidationErrors,forceValidation} from './src/main.js';
+'use strict';
+
+module.exports = require('./src/main.jsM');
