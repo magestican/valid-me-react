@@ -1,4 +1,4 @@
-[Valid-Me-React]: http://i.imgur.com/Afhv7ao.png "Valid-Me-React"
+# <a href='https://magestican.github.io/valid-me-react/'><img src='http://i.imgur.com/Afhv7ao.png' height='60'></a>
 
 ## Modern validation for modern applications.
 
