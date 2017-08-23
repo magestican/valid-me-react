@@ -13,9 +13,10 @@
     <script>
     SystemJS.config({
       map: {
+        'plugin-babel': './plugin-babel.js',
       'systemjs-babel-build': './systemjs-babel-browser.js'
       },
-      transpiler: 'systemjs-babel-build'
+      transpiler: 'plugin-babel'
       });
       SystemJS.import('./sampleApp.js');
     </script>
