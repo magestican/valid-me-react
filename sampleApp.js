@@ -1,23 +1,24 @@
-import ReactDom from 'react-dom';
-import ValidMe from './src/validMeReact';
+
+import ReactDOM from 'react-dom';
+import {ValidMe,forceValidation} from './validMeReact';
+
 
 let doHi = ()  => {
-  let validationResult = ValidMeReact.validate(undefined,undefined,"hi"); //validate elements belonging to group hi
-
+  let areThereErrors = forceValidation(undefined, undefined, 'hi'); //validate elements belonging to group hi
+  console.log(areThereErrors);
 }
 let handleChange = (event)  => {
   console.log(event.target.value);
 }
-let render = ()  => {
-  return <div>
-    <ValidMe validmefor="numeric" group="hi">
-      <input type='text' onChange={this.handleChange}/>
-    </ValidMe>
-      <button onClick={this.doHi}> Hi </button>
-  </div>
-};
-
+console.log(  document.getElementById('app'));
 ReactDOM.render(
-  render(),
+  (<div>
+  <div>
+      <ValidMe validmefor="numeric" group="hi">
+          <input type='text' onChange={handleChange}/>
+      </ValidMe>
+      </div>
+      <button onClick={doHi}> Hi </button>
+  </div>),
   document.getElementById('app')
 );
