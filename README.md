@@ -40,8 +40,14 @@ ReactDOM.render((
 Extra attributes you can pass to the ValidMe element :
 
 **validmemessage**
+
 **validmefor**
+
 **validmecondition**
+
 **validmenocolor**
+
 **validmeerror**
+
 **validmesuccess**
+
