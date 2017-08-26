@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, findDOMNode } from 'react-dom';
 let phoneNumberUtil = require('google-libphonenumber').PhoneNumberUtil;
-class ValidMeComponent extends React.Component {
+class ValidMe extends React.Component {
 
   constructor(props) {
     super(props);
@@ -398,7 +398,7 @@ class ValidMeComponent extends React.Component {
         if (validRules.type == "numeric") {
           let part1 = "^[";
           let part2 = "]+$";
-          
+
           let regex = new RegExp(part1 + "0-9" + part2);
 
           if (props.validmemessage != undefined && props.validmemessage != "")
@@ -837,7 +837,7 @@ const disableActionButton = (group) => {
   $('[data-group*="' + group + '"]').toggleClass('disable', true)
 }
 
-export let forceValidation = (notUgly, smart, groupsToValidate, element) => { //force validation has to return true or false
+ let forceValidation = (notUgly, smart, groupsToValidate, element) => { //force validation has to return true or false
   var areThereErrors = false;
   let validMeTask = {};
   if (!window.validMeReact) {
@@ -889,7 +889,7 @@ export let forceValidation = (notUgly, smart, groupsToValidate, element) => { //
   }
   return areThereErrors;
 }
-export let clearAllValidationErrors = () => {
+ let clearAllValidationErrors = () => {
 
   if (!window.validMeReact) {
     return false;
@@ -938,7 +938,7 @@ const isUndefined = (val) => { //undefined or null check
   return val == undefined;
 }
 
-export const phoneTypesEnum = {
+ const phoneTypesEnum = {
   FIXED_LINE: 0,
   MOBILE: 1,
   // In some regions (e.g. the USA), it is impossible to distinguish between
@@ -970,15 +970,9 @@ export const phoneTypesEnum = {
 };
 
 
-export let ValidMe = ValidMeComponent; //CONNECT IS A REACT HELPER FUNCTION
-
 /* SAMPLE
   <text-area input iconleft icon="user" placeholder="{{currentLang.login.usernamePlaceHolder}}" ng-model="model.user.username" validme validmefor="email" validmeaction="login" validmemessage="You must enter all your details to continue"></text-area>
-validmemessage
-validmefor
-validmeactions
-validmecondition
-validmenocolor
-validmeerror
-validmesuccess
+
   */
+
+module.exports = {forceValidation : forceValidation,ValidMe : ValidMe,clearAllValidationErrors : clearAllValidationErrors,phoneTypesEnum : phoneTypesEnum};

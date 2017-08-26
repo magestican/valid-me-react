@@ -1,1 +1,1 @@
-require('./validMeReact');
+module.exports = require('./validMeReact');

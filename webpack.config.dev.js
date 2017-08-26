@@ -6,9 +6,8 @@ const GLOBALS = {
   __DEV__: true
 };
 export default {
-  debug: true,
   devtool: 'eval-source-map', // more info:https://webpack.github.io/docs/build-performance.html#sourcemaps and https://webpack.github.io/docs/configuration.html#devtool
-  noInfo: false, // set to false to see a list of every file being bundled.
+
   entry: [
     'webpack-hot-middleware/client?reload=true',
     'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
@@ -16,6 +15,10 @@ export default {
   ],
   target: 'web', // necessary per https://webpack.github.io/docs/testing.html#compile-and-test
   output: {
+    // export itself to a global var
+    libraryTarget: "umd",
+    // name of the global var: "Foo"
+    libraryExport: ['forceValidation','ValidMe','clearAllValidationErrors','phoneTypesEnum'],
     path: `${__dirname}/dist`, // Note: Physical files are only output by the production build task `npm run build`.
     publicPath: 'http://localhost:3000/', // Use absolute paths to avoid the way that URLs are resolved by Chrome when they're parsed from a dynamically loaded CSS blob. Note: Only necessary in Dev.
     filename: 'bundle.js'
