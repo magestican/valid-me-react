@@ -51,3 +51,12 @@ Extra attributes you can pass to the ValidMe element :
 
 **validmesuccess**
 
+
+Required field + special condition
+
+validmefor="required&condition" condition={function(value){})}
+
+Mandatory length + special condition 
+
+validmefor="text&condition@1-5" condition={function(value){})}
+
