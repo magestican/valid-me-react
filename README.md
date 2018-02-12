@@ -43,7 +43,7 @@ validmefor="required&condition" condition={function(value){})}
 
 ## Mandatory length + special condition ##
 
-validmefor="text&condition@1-5" condition={function(value){})}
+validmefor="condition&text@1-5" condition={function(value){})}
 
 ## Multiple groups validation : ##
 
