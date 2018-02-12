@@ -47,8 +47,9 @@ validmefor="text&condition@1-5" condition={function(value){})}
 
 ## Multiple groups validation : ##
 
+```jsx
 <ValidMe group=firstGroupt&secondGroup validmefor="numeric" >
-
+```
 
 
 # Extra attributes you can pass to the ValidMe element : #
