@@ -28,7 +28,7 @@ ReactDOM.render((
         <input type='text' onChange={handleChange}/>
       </ValidMe>
     </div>
-    <button onClick={doHi}>
+    <button data-group="hi" onClick={doHi}> //The library will add/remove a class called "disable" to elements of the group
       Hi
     </button>
   </div>
@@ -36,6 +36,20 @@ ReactDOM.render((
 ```
 
 *The styles available in the live-sample are on the sample-styles.css file*
+
+## Required field + special condition ##
+
+validmefor="required&condition" condition={function(value){})}
+
+## Mandatory length + special condition ##
+
+validmefor="text&condition@1-5" condition={function(value){})}
+
+## Multiple groups validation : ##
+
+<ValidMe group=firstGroupt&secondGroup validmefor="numeric" >
+
+
 
 Extra attributes you can pass to the ValidMe element :
 
@@ -45,18 +59,14 @@ Extra attributes you can pass to the ValidMe element :
 
 **validmecondition**
 
+**validmeconditionmessage**
+
 **validmenocolor**
 
 **validmeerror**
 
 **validmesuccess**
 
+# Concatenating conditions : #
 
-## Required field + special condition ##
-
-validmefor="required&condition" condition={function(value){})}
-
-## Mandatory length + special condition ##
-
-validmefor="text&condition@1-5" condition={function(value){})}
 
