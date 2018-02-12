@@ -51,7 +51,7 @@ validmefor="text&condition@1-5" condition={function(value){})}
 
 
 
-Extra attributes you can pass to the ValidMe element :
+# Extra attributes you can pass to the ValidMe element : #
 
 **validmemessage**
 
@@ -67,6 +67,5 @@ Extra attributes you can pass to the ValidMe element :
 
 **validmesuccess**
 
-# Concatenating conditions : #
 
 
