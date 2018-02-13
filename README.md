@@ -52,7 +52,7 @@ window.validMeReact.validMeManager.VALIDATION.CountryCode = 'US';
 
 const phoneTypesSupported = `${phoneTypesEnum.MOBILE}-${phoneTypesEnum.FIXED_LINE}-${phoneTypesEnum.FIXED_LINE_OR_MOBILE}-${phoneTypesEnum.PERSONAL_NUMBER}-${phoneTypesEnum.VOIP}-${phoneTypesEnum.TOLL_FREE}`
 
- <ValidMe validmefor={`condition&phoneNumber@${phoneTypesSupported}`}  >
+ <ValidMe validmefor={`phoneNumber@${phoneTypesSupported}`}  >
 ```
 
 ## Multiple groups validation : ##
