@@ -1,7 +1,9 @@
-/* eslint-disable import/default */
+/* eslint-disable */
+
 import React from 'react';
 import { render, findDOMNode } from 'react-dom';
 let phoneNumberUtil = require('google-libphonenumber').PhoneNumberUtil;
+
 class ValidMe extends React.Component {
 
   constructor(props) {
@@ -35,20 +37,26 @@ class ValidMe extends React.Component {
     let input = "";
     let isDropdown = false;
     React.Children.map(this.props.children, (child, i) => {
-      if (child.props.dropdown)
+      if (child.props.dropdown || (this.props.children && this.props.children.type &&  this.props.children.props.type == 'dropdown'))
         isDropdown = true;
     }
     )
-
     if (isDropdown) {
-      input = window.$(object).find('.info span').last();
+      input = Array.from(object.querySelectorAll('.info span')).pop(); //get the last item
+
+      if (!input){
+        input = Array.from(object.querySelectorAll('[type="dropdown"] .text')).pop()
+      }
     } else {
-      input = window.$(object).find('input').last();
-      if (input.length == 0) {
-        input = window.$(object).find('textarea');
+      input = Array.from(object.querySelectorAll('input')).pop(); //get the last item
+      if (!input) {
+        input = Array.from(object.querySelectorAll('textarea')).pop();
       }
     }
 
+    if (!input) {
+      input = Array.from(object.querySelectorAll('.validation-box')).pop();
+    }
 
     if (input !== null && input != undefined) {
       this.main(input, isDropdown);
@@ -67,7 +75,13 @@ class ValidMe extends React.Component {
       validMeTask = validMeManager.validMeQueue[this.state.index];
       validMeManager.validationTask(validMeTask, true);
 
-      if (!validMeManager.areThereErrors(validMeTask.group, false))
+      let errors = false;
+      validMeTask.group.split('&').forEach((o,i)=>{
+        errors = validMeManager.areThereErrors(o, false);
+        if (errors)
+          return;
+      })
+      if (!errors)
         enableActionButton(validMeTask.group);
       else
         disableActionButton(validMeTask.group);
@@ -76,7 +90,6 @@ class ValidMe extends React.Component {
     let copies = React.Children.map(this.props.children, (child, i) => {
       let copy = React.cloneElement(child, {
         onChange: (event) => {
-          console.log("onchange")
           let validMeManager = window.validMeReact.validMeManager;
           validMeTask = validMeManager.validMeQueue[this.state.index];
 
@@ -90,7 +103,14 @@ class ValidMe extends React.Component {
             if (validMeManager.validationTask(validMeTask, true).good) { //disable timeout validation if this is ok
               clearTimeout(validMeTask.element.typingTimer);
             }
-            if (!validMeManager.areThereErrors(validMeTask.group, false))
+
+            let errors = false;
+            validMeTask.group.split('&').forEach((o,i)=>{
+              errors = validMeManager.areThereErrors(o, false);
+              if (errors)
+                return;
+            })
+            if (!errors)
               enableActionButton(validMeTask.group);
             else
               disableActionButton(validMeTask.group);
@@ -100,16 +120,23 @@ class ValidMe extends React.Component {
           }
         },
         onInput: (event) => {
+
           let validMeManager = window.validMeReact.validMeManager;
           let validMeTask = validMeManager.validMeQueue[this.state.index];
-          if (validMeTask.element.attr("datepicker") == undefined) {
+          if (validMeTask.element.datepicker == undefined) {
             validMeTask = {};
             validMeTask = validMeManager.validMeQueue[this.state.index];
             if (validMeTask.blurhappened == true) { //|| validMeTask.element.val() != ''  //filled up fields which are being modified should continue
               if (validMeManager.validationTask(validMeTask, true).good) { //disable timeout validation if this is ok
                 clearTimeout(validMeTask.element.typingTimer);
               }
-              if (!validMeManager.areThereErrors(validMeTask.group, false))
+              let errors = false;
+              validMeTask.group.split('&').forEach((o,i)=>{
+                errors = validMeManager.areThereErrors(o, false);
+                if (errors)
+                  return;
+              })
+              if (!errors)
                 enableActionButton(validMeTask.group);
               else
                 disableActionButton(validMeTask.group);
@@ -120,9 +147,10 @@ class ValidMe extends React.Component {
           }
         },
         onBlur: (event) => {
+
           let validMeManager = window.validMeReact.validMeManager;
           let element = validMeManager.validMeQueue[this.state.index].element;
-          if (element.attr("datepicker") == undefined) {
+          if (element.datepicker == undefined) {
             let validMeManager = window.validMeReact.validMeManager;
             validMeTask = {};
             validMeTask = validMeManager.validMeQueue[this.state.index];
@@ -132,7 +160,13 @@ class ValidMe extends React.Component {
               clearTimeout(validMeTask.element.typingTimer);
             }
 
-            if (isGood && !validMeManager.areThereErrors(validMeTask.group, false))
+            let errors = false;
+            validMeTask.group.split('&').forEach((o,i)=>{
+              errors = validMeManager.areThereErrors(o, false);
+              if (errors)
+                return;
+            })
+            if (!errors)
               enableActionButton(validMeTask.group);
             else
               disableActionButton(validMeTask.group);
@@ -142,13 +176,21 @@ class ValidMe extends React.Component {
           }
         },
         onFocus: (event) => {
-          console.log("onfocus exe")
+
           let validMeManager = window.validMeReact.validMeManager;
           validMeTask = {};
           validMeTask = validMeManager.validMeQueue[this.state.index];
-          if (validMeTask.element.val() != '' && !validMeManager.areThereErrors(validMeTask.group, false)) {
-            enableActionButton(validMeTask.group);
-          }
+          if (validMeTask.element.textContent != ''){
+            let errors = false;
+
+            validMeTask.group.split('&').forEach((o,i)=>{
+              errors = validMeManager.areThereErrors(o, false);
+              if (errors)
+                return;
+            })
+            if (!errors)
+              enableActionButton(validMeTask.group);
+            }
           if (child.props.onFocus != undefined) {
             child.props.onFocus(event);
           }
@@ -157,8 +199,9 @@ class ValidMe extends React.Component {
       });
       return copy;
     })
-    return <div className={this.props.fieldClasses
-      ? this.props.fieldClasses + ' field'
+
+    return <div className={this.props.fieldclasses
+      ? this.props.fieldclasses
       : 'field'}>{copies}</div>;
   }
 
@@ -169,7 +212,8 @@ class ValidMe extends React.Component {
       throw RegExp("Error : all validme references must have a group on which to be validated");
       return;
     }
-    let element = window.$(input); //wrap input around jquery to have jquery helpers
+
+    let element = input;
     let validMeManager;
 
     if (!window.validMeReact) {
@@ -190,7 +234,7 @@ class ValidMe extends React.Component {
           IncorrectSizeOfNumbersPartTwo: "please adjust it",
           OnlyNumbersAllowed: "This field should contain only numbers",
           InvalidUrl: "This field should contain a valid URL",
-          InvalidEmail: "You should input a valid email",
+          InvalidEmail: "You should enter a valid email",
           SelectionRequired: "Selection cannot be empty",
           ToggleRequired: "You must check this option",
           NoValidPhoneNumber: "You have not specified a valid phone number"
@@ -204,6 +248,7 @@ class ValidMe extends React.Component {
             VALIDATION: validation
           }
         };
+
       }
 
     }
@@ -253,11 +298,21 @@ class ValidMe extends React.Component {
           : orMessage;
       }
 
-      var value = props.validmefor == 'dropdown'
-        ? element.text()
-        : findDOMNode(this).querySelector('input').value; //this means is a radio button or a  checkbox
+      var value = '';
 
-      if (element.attr("type") == "radio" || element.attr("type") == "checkbox") {
+      if (props.validmefor == 'dropdown'){
+        value = element.value;
+        if (!value && value != ''){
+          value = element.textContent
+        }
+      } else {
+        value = element.value
+      }
+
+      if (value == '' && props.validmefor == 'dropdown') {
+        value = element.textContent;
+      }
+      if (element.type == "radio" || element.type == "checkbox") {
         value = element[0].checked.toString();
         if (value == "true" && props.validmenotrue == undefined) {
           return result;
@@ -273,15 +328,15 @@ class ValidMe extends React.Component {
         if (ruleArray.length > 1) {
           validRules.type = ruleArray[0];
           validRules.rule = ruleArray[1];
-        } else {
-          let res = ruleArray[0].split('&');
-          if (res.length > 1) {
-            validRules.type = res[0];
-            validRules.typeTwo = res[1];
-          } else {
-            validRules.type = ruleArray[0];
-          }
         }
+        let res = ruleArray[0].split('&');
+        if (res.length > 1) {
+          validRules.type = res[0];
+          validRules.typeTwo = res[1];
+        } else {
+          validRules.type = ruleArray[0];
+        }
+
         //for optional items, if they are empty it is okay
         if (props.validmeoptional != undefined && value == "") {
           return result;
@@ -295,19 +350,16 @@ class ValidMe extends React.Component {
             if (regex.test(value)) {
               result.good = false;
               result.message = customMessageOrThis(validMeManager.ERROR.OnlyAlphanumeric);
-              return result;
             } else if (value != "") {
               result.good = true;
-              return result;
             } else {
               result.good = false;
               result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
-              return result;
             }
           }
         }
 
-        if (validRules.type.indexOf("length") >= 0) {
+        if (validRules.rule.indexOf("-") >= 0 && validRules.type != 'phoneNumber' && validRules.typeTwo != 'phoneNumber') {
 
           var lengths = validRules.rule.split('-');
           let minLength = 0,
@@ -321,7 +373,6 @@ class ValidMe extends React.Component {
           if (value == "" && validRules.type != "lengthOptional") { //if its a mandatory check
             result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
             result.good = false;
-            return result;
           }
           var regex = new RegExp("^.{" + minLength + "," + maxLength + "}$"); //any type of character is allowed
           let condition = regex.test(value);
@@ -330,17 +381,176 @@ class ValidMe extends React.Component {
             result.good = false;
           } else
             result.good = true;
-          return result;
         }
-        if (validRules.type.indexOf("phoneNumber") >= 0) {
-          let validatePhoneType = undefined;
-          if (validRules.type.split('-').length > 1) {
-            validatePhoneType = parseInt(validRules.type.split('-')[1]);
+
+
+        if (validRules.type == "numeric") {
+          let part1 = "^[";
+          let part2 = "]+$";
+
+          let regex = new RegExp(part1 + "0-9" + part2);
+
+          if (props.validmemessage != undefined && props.validmemessage != "")
+            result.message = props.validmemessage;
+
+          let condition2 = regex.test(value);
+          let condition1 = validRules.rule.includes("$value") && condition2
+            ? eval(validRules.rule.replace("$value", value))
+            : true;
+          let extraValidation = validRules.rule != undefined && regex.test(validRules.rule)
+            ? true
+            : false;
+
+          if (value != "" && condition1 && condition2) {
+            if (validRules.rule != undefined && validRules.rule != "") {
+              if (value == "0") {
+                result.good = false;
+                result.message = customMessageOrThis(validMeManager.ERROR.ZeroIsNotValid);
+              } else {
+                if (extraValidation && value.length > validRules.rule) {
+                  result.good = false;
+                  result.message = props.validmemessage != undefined
+                    ? props.validmemessage
+                    : validMeManager.ERROR.IncorrectSizeOfNumbersPartOne + ' ' + validRules.rule + ' ' + validMeManager.ERROR.IncorrectSizeOfNumbersPartTwo
+                }
+                result.good = true;
+              }
+            } else {
+              result.good = true;
+            }
+
+          } else {
+            if (value == "")
+              result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
+            else {
+              if (!condition1)
+                result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
+              else if (condition1 && !condition2) {
+                result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
+
+              }
+            }
+            result.good = false;
+          }
+        }
+        if (validRules.type.indexOf("url") >= 0) {
+          let urlValid = /^(https:\/\/www\.|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/g; //for https url
+          if (value != "" && urlValid.test(value)) {
+            result.message = "Value " + value + " is a valid https url";
+            result.good = true;
+          } else {
+
+            if (value == "" && validRules.type == "urlOptional") {
+              result.good = true;
+            } else if (value == "")
+              result.message = props.validmemessage != undefined
+                ? props.validmemessage
+                : validMeManager.ERROR.InvalidUrl;
+            else
+              result.message = props.validmemessage != undefined
+                ? props.validmemessage
+                : validMeManager.ERROR.InvalidUrl;
+            result.good = false;
+          }
+        }
+        if (validRules.type.indexOf("imageUrl") >= 0) {
+          let urlValid = new RegExp("^https://(?:[a-z0-9\-]+\.)+[a-z]{2,6}(?:/[^/#?]+)+\.(?:jpg|gif|png|jpeg)$"); //copied from VCC for https
+          if (value != "" && urlValid.test(value)) {
+            result.message = props.validmemessage != undefined
+              ? props.validmemessage
+              : validMeManager.ERROR.InvalidUrl;
+            result.good = true;
+          }
+        }
+        if (validRules.type == "number") {
+
+          if (validRules.rule != undefined && validRules.rule != "") {
+
+            let part1 = "^[";
+            let part2 = "]+$";
+            let regex = new RegExp(part1 + validRules.rule + part2);
+            if (value != "" && regex.test(value)) {
+              result.message = "Value " + value + " is a number";
+              result.good = true;
+            } else {
+              if (value == "")
+                result.message = props.validmemessage != undefined
+                  ? props.validmemessage
+                  : validMeManager.ERROR.CannotBeEmpty;
+              else
+                result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
+              result.good = false;
+            }
+          } else {
+            throw RegExp("You specified a number validation but didnt provide which set of numbers to validate");
+          }
+        }
+
+        if (validRules.type == "required") {
+          if (value == "" || value == "No file selected") {
+            result.message = customMessageOrThis(validMeManager.ERROR.IsRequired);
+            result.good = false;
+          } else {
+            result.good = true;
+          }
+        }
+
+
+
+        if (validRules.type == "dropdown") {
+          if (value == "") {
+            result.message = customMessageOrThis(validMeManager.ERROR.SelectionRequired);
+            result.good = false;
+          } else if (value == props.defaulttext) {
+            result.message = customMessageOrThis(validMeManager.ERROR.SelectionRequired);
+            result.good = false;
+          } else if (props.customvalidation){
+            if (props.customvalidation()) {
+              result.good = true;
+            }
+          }
+           else {
+            result.good = true;
+          }
+
+        }
+
+        if (validRules.type == "boolean") {
+
+          if (value != validRules.rule) {
+            if (props.validmemessage != undefined && props.validmemessage != "")
+              result.message = props.validmemessage;
+            else
+              result.message = customMessageOrThis(validMeManager.ERROR.ToggleRequired);
+            result.good = false;
+          } else {
+            result.good = true;
+          }
+        }
+
+        if (validRules.type == "condition" || validRules.typeTwo == "condition" && result.good) {
+
+          if (validRules.rule !== undefined && validRules.rule !== null && validRules.rule !== "" || props.condition) {
+            if (props.condition(value)) {
+              result.good = true;
+            } else {
+              result.message = props.validmemessagecondition != undefined
+                ? props.validmemessagecondition
+                : "";
+              result.good = false;
+            }
+          }
+        }
+
+        if (validRules.type == 'phoneNumber' || validRules.typeTwo == 'phoneNumber' && result.good && !props.secondaryconditionpassed) {
+
+          let validatePhoneTypes = [];
+          if (validRules.rule) {
+            validatePhoneTypes = validRules.rule.split('-');
           }
 
           if (validRules.rule.includes('emptyok') && value == '') {
             result.good = true;
-            return result;
           }
           try {
             if (0 > value.indexOf('+')) {//doesnt start with +
@@ -348,7 +558,8 @@ class ValidMe extends React.Component {
               let parsedNumber = util.parse(value, validMeManager.VALIDATION.CountryCode);
               if (util.isValidNumber(parsedNumber)) {
                 let numberType = util.getNumberType(parsedNumber);
-                if (!validatePhoneType || numberType == validatePhoneType) {
+                
+                if (!validatePhoneTypes || validatePhoneTypes.indexOf(numberType.toString()) > 0) {
                   //either not validatePhone type provided
                   //or if provided it matches the numberType
                   result.good = true;
@@ -393,189 +604,26 @@ class ValidMe extends React.Component {
             result.message = customMessageOrThis(validMeManager.ERROR.NoValidPhoneNumber);
           }
 
-          return result;
-        }
-        if (validRules.type == "numeric") {
-          let part1 = "^[";
-          let part2 = "]+$";
-
-          let regex = new RegExp(part1 + "0-9" + part2);
-
-          if (props.validmemessage != undefined && props.validmemessage != "")
-            result.message = props.validmemessage;
-
-          let condition2 = regex.test(value);
-          let condition1 = validRules.rule.includes("$value") && condition2
-            ? eval(validRules.rule.replace("$value", value))
-            : true;
-          let extraValidation = validRules.rule != undefined && regex.test(validRules.rule)
-            ? true
-            : false;
-
-          if (value != "" && condition1 && condition2) {
-            if (validRules.rule != undefined && validRules.rule != "") {
-              if (value == "0") {
-                result.good = false;
-                result.message = customMessageOrThis(validMeManager.ERROR.ZeroIsNotValid);
-                return result;
-              } else {
-                if (extraValidation && value.length > validRules.rule) {
-                  result.good = false;
-                  result.message = props.validmemessage != undefined
-                    ? props.validmemessage
-                    : validMeManager.ERROR.IncorrectSizeOfNumbersPartOne + ' ' + validRules.rule + ' ' + validMeManager.ERROR.IncorrectSizeOfNumbersPartTwo
-                  return result;
-                }
-                result.good = true;
-                return result;
-              }
-            } else {
-              result.good = true;
-              return result;
-            }
-
-          } else {
-            if (value == "")
-              result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
-            else {
-              if (!condition1)
-                result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
-              else if (condition1 && !condition2) {
-                result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
-
-              }
-            }
-            result.good = false;
-            return result;
-          }
-        }
-        if (validRules.type.indexOf("url") >= 0) {
-          let urlValid = /^(https:\/\/www\.|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/g; //for https url
-          if (value != "" && urlValid.test(value)) {
-            result.message = "Value " + value + " is a valid https url";
+          if (props.optional && value == '') {
             result.good = true;
-            return result;
-          } else {
-
-            if (value == "" && validRules.type == "urlOptional") {
-              result.good = true;
-              return result;
-            } else if (value == "")
-              result.message = props.validmemessage != undefined
-                ? props.validmemessage
-                : validMeManager.ERROR.InvalidUrl;
-            else
-              result.message = props.validmemessage != undefined
-                ? props.validmemessage
-                : validMeManager.ERROR.InvalidUrl;
-            result.good = false;
-            return result;
+            result.message = '';
           }
         }
-        if (validRules.type.indexOf("imageUrl") >= 0) {
-          let urlValid = new RegExp("^https://(?:[a-z0-9\-]+\.)+[a-z]{2,6}(?:/[^/#?]+)+\.(?:jpg|gif|png|jpeg)$"); //copied from VCC for https
-          if (value != "" && urlValid.test(value)) {
-            result.message = props.validmemessage != undefined
-              ? props.validmemessage
-              : validMeManager.ERROR.InvalidUrl;
-            result.good = true;
-            return result;
-          }
-        }
-        if (validRules.type == "number") {
 
-          if (validRules.rule != undefined && validRules.rule != "") {
-
-            let part1 = "^[";
-            let part2 = "]+$";
-            let regex = new RegExp(part1 + validRules.rule + part2);
-            if (value != "" && regex.test(value)) {
-              result.message = "Value " + value + " is a number";
-              result.good = true;
-              return result;
-            } else {
-              if (value == "")
-                result.message = props.validmemessage != undefined
-                  ? props.validmemessage
-                  : validMeManager.ERROR.CannotBeEmpty;
-              else
-                result.message = customMessageOrThis(validMeManager.ERROR.OnlyNumbersAllowed);
-              result.good = false;
-              return result;
-            }
-          } else {
-            throw RegExp("You specified a number validation but didnt provide which set of numbers to validate");
-          }
-        }
-        if (validRules.type == "email") {
-          if (value == "") {
+        if (validRules.type == "email" || validRules.typeTwo == "email" && result.good && !props.secondaryconditionpassed) {
+          if (value == "" && props.optional == undefined) {
             result.message = customMessageOrThis(validMeManager.ERROR.CannotBeEmpty);
             result.good = false;
-            return result;
-          }
-          let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          if (re.test(value)) {
+          } else if (value == "" && props.optional != undefined){
             result.good = true;
-            return result;
-          } else {
-            result.good = false;
-            result.message = customMessageOrThis(validMeManager.ERROR.InvalidEmail);
-            return result;
           }
-        }
-        if (validRules.type == "required") {
-          if (value == "" || value == "No file selected") {
-            result.message = customMessageOrThis(validMeManager.ERROR.IsRequired);
-            result.good = false;
-            return result;
-          } else {
-            result.good = true;
-            if (validRules.typeTwo == undefined) { //only return if there are no other validations pending
-              return result;
-            }
-          }
-        }
-        if (validRules.type == "dropdown") {
-
-          if (value == "") {
-            result.message = customMessageOrThis(validMeManager.ERROR.SelectionRequired);
-            result.good = false;
-            return result;
-          } else if (value == props.defaulttext) {
-            result.message = customMessageOrThis(validMeManager.ERROR.SelectionRequired);
-            result.good = false;
-            return result;
-          } else {
-            result.good = true;
-            return result;
-          }
-        }
-
-        if (validRules.type == "boolean") {
-
-          if (value != validRules.rule) {
-            if (props.validmemessage != undefined && props.validmemessage != "")
-              result.message = props.validmemessage;
-            else
-              result.message = customMessageOrThis(validMeManager.ERROR.ToggleRequired);
-            result.good = false;
-            return result;
-          } else {
-            result.good = true;
-            return result;
-          }
-        }
-        if (validRules.type == "condition" || validRules.typeTwo == "condition") {
-          if (validRules.rule !== undefined && validRules.rule !== null && validRules.rule !== "" || props.condition) {
-            if (props.condition()) {
+          else {
+            let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            if (re.test(value)) {
               result.good = true;
-              return result;
             } else {
-              result.message = props.validmemessagecondition != undefined
-                ? props.validmemessagecondition
-                : "";
               result.good = false;
-              return result;
+              result.message = customMessageOrThis(validMeManager.ERROR.InvalidEmail);
             }
           }
         }
@@ -614,10 +662,17 @@ class ValidMe extends React.Component {
       validMeManager.validMeQueue[this.state.index].toggleError = validMeManager.validMeQueue[this.state.index].showError = () => {
         validMeManager.validMeQueue.map((o, i) => {
           if (i != index) {
-            validMeManager.validMeQueue[i].element.parent().find(".error-label").hide();
+            /*let errorElement = validMeManager.validMeQueue[this.state.index].element.parentElement.querySelector(".error-label");
+            if (errorElement.className.indexOf(hidden) < 0){
+              errorElement.className = errorElement.className + 'hidden';
+            }
+            */
           }
-          if (i == validMeManager.validMeQueue.length - 1) {
-            validMeManager.validMeQueue[this.state.index].element.parent().find(".error-label").show();
+          if (i == validMeManager.validMeQueue.length - 1) { //make visible
+            let errorElement = validMeManager.validMeQueue[this.state.index].element.parentElement.querySelector(".error-label");
+            if (errorElement){
+              errorElement.className = errorElement.className.replace('hidden','');
+            }
           }
         })
 
@@ -625,21 +680,21 @@ class ValidMe extends React.Component {
 
       if (isDropdown) {
         //TODO I HAVE TO FIX VALIDATION IN HERE !
-        element.parent('.supa-dropdown').click(validMeManager.validMeQueue[this.state.index].showError);
+        getParents(element,'.supa-dropdown').onclick = validMeManager.validMeQueue[this.state.index].showError;
       } else
-        element[0].onclick = validMeManager.validMeQueue[this.state.index].showError;
+        element.onclick = validMeManager.validMeQueue[this.state.index].showError;
 
-      validMeManager.validMeQueue[this.state.index].errorTemplate = props.template || '<div style="display:none;" class="error-label"><span class="error-pointy-corner"></span><span className="error-color">$ERRORHERE</span>  </div>';
-      validMeManager.validMeQueue[this.state.index].errorCheckmarkTemplate = '<i onclick="validMeReact.validMeManager.validMeQueue[' + index.toString() + '].toggleError();" class="warning big circle icon error-checkmark">!</i>';
+      validMeManager.validMeQueue[this.state.index].errorTemplate = props.template || '<div class="error-label"><span class="error-pointy-corner"></span><span class="error-color message">$ERRORHERE</span>  </div>';
+      validMeManager.validMeQueue[this.state.index].errorCheckmarkTemplate = '<i onclick="validMeReact.validMeManager.validMeQueue[' + index.toString() + '].toggleError();" class="warning big circle icon error-checkmark"></i>';
       validMeManager.validMeQueue[this.state.index].isDropdown = isDropdown;
 
       //ugly jquery like stuff
       if (validMeManager.validationTask == undefined) {
         validMeManager.validationTask = (validMeTask, showErrorsIfNeeded, triggeredByButton, forceError, errorMessage) => {
 
-          if (validMeTask.element.attr("validmecondition") != undefined && !showErrorsIfNeeded) {
-            //check if condition is true
-            if (!eval(validMeTask.element.attr("validmecondition"))) {
+          if ((validMeTask.element.validmecondition) != undefined && !showErrorsIfNeeded) {
+
+            if (validMeTask.element.validmecondition(value)) {
               var res = {
                 message: "DoNotValidate",
                 element: {},
@@ -654,6 +709,7 @@ class ValidMe extends React.Component {
           if (!showErrorsIfNeeded) { }
           var successEvent = props.validmesuccess;
           var errorEvent = props.validmeerror;
+
           if ((!result.good && showErrorsIfNeeded == true) || forceError == true) {
 
             var toContinue = true
@@ -664,32 +720,48 @@ class ValidMe extends React.Component {
             }
             if (toContinue) {
 
-              if (validMeTask.props.validmenored == undefined)
-                validMeTask.element.toggleClass('error-border', true);
+              if (validMeTask.props.validmenored == undefined){
+                  setTimeout(()=>{
+
+                    if (validMeTask.element.className.indexOf('error-border') < 0){
+                      if(validMeTask.isDropdown){
+                        validMeTask.element.parentElement.className += ' ' + 'error-border'
+                      } else {
+                        validMeTask.element.className += ' ' + 'error-border'
+                      }
+                    }
+                  },0)//do this in the next thread to bypass libraries that replace our styles
+              }
               if (errorMessage != undefined)
                 result.message = errorMessage;
 
               window[errorMessage + validMeTask.index.toString()] = result.message;
 
-              if (validMeTask.element.parent().find(".error-label").length == 0) { //do not append again
-                if (result.message != "") {
-                  validMeTask.element.parent().append(validMeTask.errorTemplate);
-                  validMeTask.element.parent().append(validMeTask.errorCheckmarkTemplate);
+              if (!validMeTask.element.parentElement.querySelector('.error-label')) { //do not append again
+
+                if (result.message != '' && validMeTask.isDropdown) {
+                  validMeTask.element.parentElement.insertAdjacentHTML('beforeend',validMeTask.errorTemplate);
+                  validMeTask.element.parentElement.insertAdjacentHTML('beforeend',validMeTask.errorCheckmarkTemplate);
+                } else {
+                  validMeTask.element.parentElement.insertAdjacentHTML('beforeend',validMeTask.errorTemplate);
+                  validMeTask.element.parentElement.insertAdjacentHTML('beforeend',validMeTask.errorCheckmarkTemplate);
                 }
                 //change left label (if exists) to have a red color
                 var possibleLabel = {};
 
                 if (validMeTask.props.validmeselectthirdparent != undefined)
-                  possibleLabel = validMeTask.element.parent().parent().parent().find("label:first");
+                  possibleLabel = validMeTask.element.parentElement.parentElement.parentElement.querySelector('label');
                 else if (validMeTask.props.validmeselectfourthparent != undefined)
-                  possibleLabel = validMeTask.element.parent().parent().parent().parent().find("label:first");
+                  possibleLabel = validMeTask.element.parentElement.parentElement.parentElement.parentElement.querySelector('label');
                 else
-                  possibleLabel = validMeTask.element.parent().parent().find("label:first");
+                  possibleLabel = validMeTask.element.parentElement.parentElement.querySelector('label');
 
                 //if child exists
-                if (possibleLabel.length > 0) {
+                if (possibleLabel) {
                   if (validMeTask.props.validmenocolor == undefined) {
-                    possibleLabel.toggleClass('error-color', true);
+                    if (possibleLabel.className.indexOf('error-color') < 0){
+                      validMeTask.element.className += ' ' + 'error-color'
+                    }
                     validMeTask.borderErrorAdded = true;
                   }
                 }
@@ -699,15 +771,16 @@ class ValidMe extends React.Component {
               }
 
               //THIS IS A FIX BECAUSE ANGULAR DOESNT ALWAYS UPDATE THE VALUES IN THE SCOPE
-              if (validMeTask.element.parent().parent().find(".error-label") != undefined) {
+
+              if (validMeTask.element.parentElement.parentElement.querySelector('.error-label') != undefined) {
                 if (errorMessage != undefined)
                   result.message = errorMessage;
-                validMeTask.element.parent().parent().find(".error-label").children().last().text(result.message); //FORCED TEXT UPDATE
+
+                validMeTask.element.parentElement.parentElement.querySelector('.error-label .error-color.message').textContent = result.message; //FORCED TEXT UPDATE
               }
             }
           } else if (showErrorsIfNeeded == true) { //this means the method who executed this is just checking for errors and doesnt want to remove errors of components
             removeErrors(validMeTask, successEvent);
-
           }
           return result
         }
@@ -735,17 +808,8 @@ class ValidMe extends React.Component {
         for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
           validMeTask = {};
           validMeTask = validMeManager.validMeQueue[i];
-          if (validMeTask.props.ngModel != undefined) {
-            if (validMeTask.props != undefined && validMeTask.props.ngModel != undefined) {
-              if (validMeTask.props.ngModel.split(".name").join("") == element.attr("modelBind")) {
-                return validMeManager.validationTask(validMeTask, false, false, true, message);
-              } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ng-model")) {
-                return validMeManager.validationTask(validMeTask, false, false, true, message);
-              } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ngmodel")) {
-                return validMeManager.validationTask(validMeTask, false, false, true, message);
-              }
-            }
-          }
+
+          //TODO IMPLEMENT THIS FUNCTION
         }
       }
     }
@@ -792,20 +856,30 @@ let groupValidation = (groupsName, showErrorsIfNeeded) => {
 }
 
 let removeErrors = (validMeTask, successEvent) => {
-  validMeTask.element.toggleClass('error-border', false);
-  validMeTask.element.parent().find(".error-label").remove();
-  validMeTask.element.parent().find(".error-checkmark").remove();
+
+  if (validMeTask.isDropdown){
+    validMeTask.element.parentElement.className = validMeTask.element.parentElement.className.replace('error-border', '');
+  } else {
+    validMeTask.element.className = validMeTask.element.className.replace('error-border', '');
+  }
+  let errorLabelToRemove = validMeTask.element.parentElement.querySelector(".error-label");
+  let errorCheckmarkToRemove = validMeTask.element.parentElement.querySelector(".error-checkmark");
+
+  if (errorLabelToRemove)
+    errorLabelToRemove.remove();
+  if (errorCheckmarkToRemove)
+    errorCheckmarkToRemove.remove()
   var possibleLabel = {}
   if (validMeTask.props.validmeoptional != undefined) {
-    possibleLabel = validMeTask.element.parent().find("label:first");
+    possibleLabel = validMeTask.element.parentElement.querySelector('label');
   } else {
-    possibleLabel = validMeTask.element.parent().parent().find("label:first");
+    possibleLabel = validMeTask.element.parentElement.parentElement.querySelector('label');
   }
 
   //if child exists
-  if (possibleLabel.length > 0) {
+  if (possibleLabel) {
     if (validMeTask.borderErrorAdded == true) {
-      possibleLabel.toggleClass('error-color', false);;
+      possibleLabel.className.replace('error-color', '');
       validMeTask.borderErrorAdded = false;
     }
   }
@@ -818,7 +892,6 @@ let groupValidationLoop = (groupName, showErrorsIfNeeded) => {
   var errors = false;
 
   window.validMeReact.validMeManager.validMeQueue.forEach((validMeTask, i) => {
-
     if (validMeTask.group.includes(groupName)) {
       if (isVisible(validMeTask.element)) {
         var tempResult = window.validMeReact.validMeManager.validationTask(validMeTask, showErrorsIfNeeded).good;
@@ -831,13 +904,26 @@ let groupValidationLoop = (groupName, showErrorsIfNeeded) => {
 }
 
 const enableActionButton = (group) => {
-  $('[data-group*="' + group + '"]').toggleClass('disable', false)
+  let buttonListToEnable = document.querySelectorAll('[data-group*="' + group + '"]');
+  if (buttonListToEnable) {
+    Array.from(buttonListToEnable).forEach((o,i)=>{
+      o.className = o.className.replace('disabled','');
+    })
+  }
 }
 const disableActionButton = (group) => {
-  $('[data-group*="' + group + '"]').toggleClass('disable', true)
+  let buttonListToDisable = document.querySelectorAll('[data-group*="' + group + '"]');
+  if (buttonListToDisable){
+    Array.from(buttonListToDisable).forEach((o,i)=>{
+      if (o.className.indexOf('disabled') < 0){
+        o.className += ' disabled';
+      }
+    })
+  }
 }
 
  let forceValidation = (notUgly, smart, groupsToValidate, element) => { //force validation has to return true or false
+
   var areThereErrors = false;
   let validMeTask = {};
   if (!window.validMeReact) {
@@ -870,26 +956,11 @@ const disableActionButton = (group) => {
     } else if (groupsToValidate != undefined) {
       let showErrorsIfNeeded = true;
       areThereErrors = groupValidation(groupsToValidate, showErrorsIfNeeded);
-    } else if (element != undefined) {
-
-      for (var i = 0; i < validMeManager.validMeQueue.length; i++) {
-        validMeTask = {};
-        validMeTask = validMeManager.validMeQueue[i];
-        if (validMeTask.props.ngModel != undefined) {
-          if (validMeTask.props.ngModel.split(".name").join("") == element.attr("modelBind")) {
-            validMeManager.validationTask(validMeTask, true);
-          } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ng-model")) {
-            validMeManager.validationTask(validMeTask, true);
-          } else if (validMeTask.props.ngModel.split(".name").join("") == element.attr("ngmodel")) {
-            validMeManager.validationTask(validMeTask, true);
-          }
-        }
-      }
     }
   }
   return areThereErrors;
 }
- let clearAllValidationErrors = () => {
+  let clearAllValidationErrors = () => {
 
   if (!window.validMeReact) {
     return false;
@@ -906,6 +977,44 @@ const disableActionButton = (group) => {
     disableActionButton(validMeTask.group);
   }
 }
+
+let getParents = function (elem, selector) {
+
+    // Element.matches() polyfill
+    if (!Element.prototype.matches) {
+        Element.prototype.matches =
+            Element.prototype.matchesSelector ||
+            Element.prototype.mozMatchesSelector ||
+            Element.prototype.msMatchesSelector ||
+            Element.prototype.oMatchesSelector ||
+            Element.prototype.webkitMatchesSelector ||
+            function(s) {
+                var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+                    i = matches.length;
+                while (--i >= 0 && matches.item(i) !== this) {}
+                return i > -1;
+            };
+    }
+
+    // Set up a parent array
+    var parents = [];
+
+    // Push each parent element to the array
+    for ( ; elem && elem !== document; elem = elem.parentNode ) {
+        if (selector) {
+            if (elem.matches(selector)) {
+                parents.push(elem);
+            }
+            continue;
+        }
+        parents.push(elem);
+    }
+
+    // Return our parent array
+    return parents;
+
+};
+
 
 const random = (min, max) => {
   return Math.random() * (max - min) + min;
@@ -938,7 +1047,7 @@ const isUndefined = (val) => { //undefined or null check
   return val == undefined;
 }
 
- const phoneTypesEnum = {
+const phoneTypesEnum = {
   FIXED_LINE: 0,
   MOBILE: 1,
   // In some regions (e.g. the USA), it is impossible to distinguish between
@@ -972,6 +1081,8 @@ const isUndefined = (val) => { //undefined or null check
 
 /* SAMPLE
   <text-area input iconleft icon="user" placeholder="{{currentLang.login.usernamePlaceHolder}}" ng-model="model.user.username" validme validmefor="email" validmeaction="login" validmemessage="You must enter all your details to continue"></text-area>
+
+  import {ValidMe,forceValidation,clearAllValidationErrors,phoneTypesEnum} from 'valid-me-react';
 
   */
 
