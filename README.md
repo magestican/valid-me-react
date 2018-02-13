@@ -39,12 +39,13 @@ ReactDOM.render((
 
 ## Required field + special condition ##
 
-validmefor="required&condition" condition={function(value){})}
-
+```jsx
+<ValidMe validmefor="required&condition" condition={function(value){})} >
+```
 ## Mandatory length + special condition ##
-
-validmefor="condition&text@1-5" condition={function(value){})}
-
+```jsx
+<ValidMe validmefor="condition&text@1-5" condition={function(value){})} >
+```
 ## US phone number ##
 ```jsx
 window.validMeReact.validMeManager.VALIDATION.CountryCode = 'US';
