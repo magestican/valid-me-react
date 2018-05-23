@@ -36,14 +36,14 @@ ReactDOM.render((
 ```
 
 ## Possible validations : ## 
-
+```
 numeric
 text
 text@alphanumeric
 email
 phoneNumber
 *(need to be passed in validmefor attribute)
-
+```
 *The styles available in the live-sample are on the sample-styles.css file*
 
 ## Required field + special condition ##
