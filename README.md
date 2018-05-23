@@ -41,6 +41,8 @@ numeric
 text
 text@alphanumeric
 email
+url
+imageUrl
 phoneNumber
 *(need to be passed in validmefor attribute)
 ```
